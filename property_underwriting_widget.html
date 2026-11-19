@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap" rel="stylesheet" />
+  <style>
+    /* Hallmark Editorial */
+    :root {
+      --color-paper: oklch(97% 0.007 86);
+      --color-paper-2: oklch(94% 0.010 86);
+      --color-ink: oklch(16% 0.012 280);
+      --color-ink-2: oklch(29% 0.011 280);
+      --color-muted: oklch(48% 0.010 75);
+      --color-rule: oklch(85% 0.009 85);
+      --color-rule-2: oklch(64% 0.010 80);
+      --color-accent: oklch(49% 0.130 152);
+      --color-accent-ink: oklch(98% 0.005 88);
+      --font-display: "Bricolage Grotesque", ui-sans-serif, sans-serif;
+      --font-body: "Source Serif 4", ui-serif, Georgia, serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--color-ink-2);
+      background: transparent;
+      font-optical-sizing: auto;
+      font-variant-numeric: oldstyle-nums;
+    }
+
+    .ed-well {
+      background: var(--color-paper);
+      border-top: 4px solid var(--color-ink);
+      border-bottom: 1px solid var(--color-rule-2);
+      border-radius: 0;
+    }
+
+    .ed-head {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-variation-settings: "wdth" 75, "opsz" 96;
+      letter-spacing: -0.012em;
+      line-height: 0.98;
+      color: var(--color-ink);
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    .ed-label {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-variation-settings: "opsz" 12;
+    }
+
+    .ed-btn {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid var(--color-ink);
+      border-radius: 0;
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-variation-settings: "opsz" 12;
+      font-size: 13px;
+      background: transparent;
+      color: var(--color-ink);
+      cursor: pointer;
+    }
+    .ed-btn.active {
+      background: var(--color-ink);
+      color: var(--color-paper);
+    }
+
+    .ed-tag {
+      background: var(--color-accent);
+      color: var(--color-accent-ink);
+      padding: 2px 8px;
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-variation-settings: "opsz" 12;
+      font-size: 12px;
+      border-radius: 0;
+    }
+
+    input[type="range"] { accent-color: var(--color-ink); }
+  </style>
+</head>
+<body class="p-0 m-0 antialiased">
+  <div class="ed-well p-4 sm:p-5 space-y-4">
+    <!-- Top Heavy Rule Header & Square Strategy Keys -->
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b" style="border-color: var(--color-rule);">
+      <div class="flex items-center gap-2.5">
+        <h2 class="ed-head text-2xl">Underwriting spec sheet</h2>
+        <span id="deal-tag" class="ed-tag">In print · 1.38x</span>
+      </div>
+      <div class="flex items-center gap-1.5" role="tablist" aria-label="Strategy">
+        <button type="button" data-strategy="hold" class="strat-btn ed-btn active">Buy &amp; hold</button>
+        <button type="button" data-strategy="brrrr" class="strat-btn ed-btn">BRRRR</button>
+        <button type="button" data-strategy="str" class="strat-btn ed-btn">Short-term</button>
+      </div>
+    </div>
+
+    <p class="text-sm italic" style="color: var(--color-ink);">
+      Adjust acquisition price, monthly rent, note rate, and operating load to recalculate net yield and five-year equity in place.
+    </p>
+
+    <!-- Square Paper-2 Spec Cells -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 border-t border-b" style="border-color: var(--color-rule-2); background: var(--color-paper-2);">
+      <label class="p-3 border-b sm:border-b-0 border-r block" style="border-color: var(--color-rule);">
+        <span class="ed-label text-xs block" style="color: var(--color-muted);">Purchase</span>
+        <span id="val-price" class="ed-head text-lg block mt-0.5">$340,000</span>
+        <input id="inp-price" type="range" min="120000" max="1200000" step="10000" value="340000" class="w-full mt-1" />
+      </label>
+      <label class="p-3 border-b sm:border-b-0 sm:border-r block" style="border-color: var(--color-rule);">
+        <span class="ed-label text-xs block" style="color: var(--color-muted);">Monthly rent</span>
+        <span id="val-rent" class="ed-head text-lg block mt-0.5">$3,150</span>
+        <input id="inp-rent" type="range" min="1000" max="12000" step="50" value="3150" class="w-full mt-1" />
+      </label>
+      <label class="p-3 border-r block" style="border-color: var(--color-rule);">
+        <span class="ed-label text-xs block" style="color: var(--color-muted);">Note rate</span>
+        <span id="val-rate" class="ed-head text-lg block mt-0.5">6.25%</span>
+        <input id="inp-rate" type="range" min="3.5" max="10.0" step="0.125" value="6.25" class="w-full mt-1" />
+      </label>
+      <label class="p-3 block">
+        <span class="ed-label text-xs block" style="color: var(--color-muted);">Operating load</span>
+        <span id="val-opex" class="ed-head text-lg block mt-0.5">32%</span>
+        <input id="inp-opex" type="range" min="18" max="60" step="1" value="32" class="w-full mt-1" />
+      </label>
+    </div>
+
+    <!-- Reversed-Out Ink Band Figures -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 p-4 gap-3" style="background: var(--color-ink); color: var(--color-paper);">
+      <div>
+        <div class="ed-label text-xs" style="color: var(--color-rule);">Cap rate</div>
+        <div id="kpi-cap" class="ed-head text-3xl mt-1" style="color: var(--color-paper);">7.56%</div>
+      </div>
+      <div class="sm:pl-3 sm:border-l" style="border-color: var(--color-ink-2);">
+        <div class="ed-label text-xs" style="color: var(--color-rule);">Cash-on-cash</div>
+        <div id="kpi-coc" class="ed-head text-3xl mt-1" style="color: var(--color-paper);">8.84%</div>
+      </div>
+      <div class="sm:pl-3 sm:border-l" style="border-color: var(--color-ink-2);">
+        <div class="ed-label text-xs" style="color: var(--color-rule);">Net cash / mo</div>
+        <div id="kpi-cf" class="ed-head text-3xl mt-1" style="color: var(--color-paper);">+$531</div>
+      </div>
+      <div class="sm:pl-3 sm:border-l" style="border-color: var(--color-ink-2);">
+        <div class="ed-label text-xs" style="color: var(--color-rule);">5-yr equity</div>
+        <div id="kpi-eq" class="ed-head text-3xl mt-1" style="color: var(--color-paper);">$174k</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      let currentStrategy = 'hold';
+      const priceEl = document.getElementById('inp-price');
+      const rentEl = document.getElementById('inp-rent');
+      const rateEl = document.getElementById('inp-rate');
+      const opexEl = document.getElementById('inp-opex');
+
+      function computeMetrics() {
+        const price = Number(priceEl.value), baseRent = Number(rentEl.value), rate = Number(rateEl.value) / 100, opexRatio = Number(opexEl.value) / 100;
+        let effectiveRent = baseRent, downPct = 0.20, rehabCost = 0, arvMultiplier = 1.0, effectiveOpex = opexRatio;
+        if (currentStrategy === 'brrrr') { rehabCost = Math.round(price * 0.12); arvMultiplier = 1.24; effectiveRent = baseRent * 1.12; downPct = 0.15; }
+        else if (currentStrategy === 'str') { effectiveRent = baseRent * 1.55; effectiveOpex = Math.min(0.68, opexRatio + 0.14); }
+        const noi = effectiveRent * 12 * (1 - effectiveOpex), capRate = (noi / price) * 100;
+        const loan = price * 0.80, mr = rate / 12, n = 360;
+        const aDebt = (loan * (mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1)) * 12;
+        const cashIn = Math.max(1, price * downPct + price * 0.03 + (currentStrategy === 'brrrr' ? rehabCost * 0.35 : 0));
+        const aCf = noi - aDebt, mCf = aCf / 12, coc = (aCf / cashIn) * 100, dscr = noi / Math.max(1, aDebt);
+        const propVal5 = price * arvMultiplier * Math.pow(1.04, 5);
+        const rem5 = loan * (Math.pow(1 + mr, n) - Math.pow(1 + mr, 60)) / (Math.pow(1 + mr, n) - 1);
+        return { price, baseRent, rate, opexRatio, capRate, coc, mCf, dscr, eq5: Math.max(0, propVal5 - rem5) };
+      }
+
+      function renderUI() {
+        const m = computeMetrics();
+        document.getElementById('val-price').textContent = '$' + m.price.toLocaleString();
+        document.getElementById('val-rent').textContent = '$' + m.baseRent.toLocaleString();
+        document.getElementById('val-rate').textContent = (m.rate * 100).toFixed(2) + '%';
+        document.getElementById('val-opex').textContent = Math.round(m.opexRatio * 100) + '%';
+        document.getElementById('kpi-cap').textContent = m.capRate.toFixed(2) + '%';
+        document.getElementById('kpi-coc').textContent = m.coc.toFixed(2) + '%';
+        document.getElementById('kpi-cf').textContent = (m.mCf >= 0 ? '+$' : '-$') + Math.abs(Math.round(m.mCf)).toLocaleString();
+        document.getElementById('kpi-eq').textContent = '$' + Math.round(m.eq5 / 1000) + 'k';
+        document.getElementById('deal-tag').textContent = `${m.dscr >= 1.25 ? 'Cleared' : 'Review'} · ${m.dscr.toFixed(2)}x`;
+      }
+
+      document.querySelectorAll('.strat-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          currentStrategy = btn.getAttribute('data-strategy');
+          document.querySelectorAll('.strat-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderUI();
+        });
+      });
+      [priceEl, rentEl, rateEl, opexEl].forEach((el) => el.addEventListener('input', renderUI));
+      renderUI();
+    })();
+  </script>
+</body>
+</html>

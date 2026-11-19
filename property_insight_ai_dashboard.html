@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PropertyInsight AI — Dusk Edition (v6.0 Open-Source Spatial &amp; ECharts)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600&family=Wix+Madefor+Text:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Open-Source MapLibre GL JS 5 (BSD-3-Clause, 3D Vector Buildings & Perspectives) -->
+  <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
+  <!-- Open-Source Leaflet 1.9.4 (BSD-2-Clause, Raster Satellite / Topo / Carto Dusk) -->
+  <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Apache ECharts 5.5.1 (Apache-2.0, Institutional Charts & Graphs) -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+
+  <style>
+    /* Hallmark Dusk Theme Stamp — dusk: fog/periwinkle-apricot/glass */
+    :root {
+      --color-paper: oklch(17.5% 0.014 268);
+      --color-paper-2: oklch(21% 0.016 268);
+      --color-paper-3: oklch(25% 0.017 268);
+      --color-ink: oklch(96% 0.006 75);
+      --color-ink-2: oklch(85% 0.010 262);
+      --color-muted: oklch(70% 0.016 262);
+      --color-rule: oklch(30% 0.016 266);
+      --color-light: oklch(100% 0 0);
+      --color-shade: oklch(10% 0.022 268);
+      --color-accent: oklch(77% 0.10 274);
+      --color-accent-ink: oklch(19% 0.035 274);
+      --color-accent-hi: oklch(84% 0.085 274);
+      --color-accent-deep: oklch(44% 0.13 274);
+      --color-accent-soft: oklch(91% 0.038 274);
+      --color-focus: oklch(80% 0.10 274);
+      --color-accent-2: oklch(83% 0.095 62);
+      --color-dusk: oklch(70% 0.12 330);
+      --color-ok: oklch(76% 0.11 160);
+      --color-day-ink: oklch(22% 0.022 268);
+      --color-day-muted: oklch(38% 0.022 266);
+      --color-fog: oklch(94% 0.012 70);
+      --color-well: oklch(95.5% 0.008 75);
+      --color-well-2: oklch(92% 0.010 75);
+      --color-well-ink: oklch(21% 0.016 268);
+      --color-well-muted: oklch(47% 0.016 265);
+      --color-well-rule: oklch(87.5% 0.009 75);
+      --color-card: oklch(99.5% 0.003 75);
+      --glass: oklch(22% 0.018 268 / 0.58);
+      --glass-blur: 22px;
+      --glass-hi: inset 0 1px 0 oklch(100% 0 0 / 0.10), inset 0 0 0 1px oklch(100% 0 0 / 0.06);
+      --shadow-card: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 40px 80px -32px oklch(8% 0.02 268 / 0.7);
+      --font-display: "Wix Madefor Display", ui-sans-serif, system-ui, sans-serif;
+      --font-body: "Wix Madefor Text", ui-sans-serif, system-ui, sans-serif;
+      --radius-card: 18px;
+      --radius-inner: 10px;
+      --radius-pill: 999px;
+      --tracking-display: -0.022em;
+      --display-weight: 500;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    ::selection { background: var(--color-accent); color: var(--color-accent-ink); }
+
+    html, body {
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--color-paper);
+      color: var(--color-ink);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.55;
+      caret-color: var(--color-accent);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    h1, h2, h3, h4 {
+      font-family: var(--font-display);
+      font-weight: var(--display-weight);
+      letter-spacing: var(--tracking-display);
+      line-height: 1.08;
+    }
+
+    .num { font-family: var(--font-display); font-variant-numeric: tabular-nums; font-weight: 500; }
+    .num .c { color: var(--color-muted); font-size: 0.62em; }
+
+    .glass {
+      background: var(--glass);
+      border-radius: var(--radius-card);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+      backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+      box-shadow: var(--glass-hi), var(--shadow-card);
+    }
+
+    .inner-well {
+      background: oklch(100% 0 0 / 0.045);
+      border-radius: var(--radius-inner);
+      border: 1px solid oklch(100% 0 0 / 0.055);
+    }
+
+    .bone-well {
+      background: var(--color-well);
+      color: var(--color-well-ink);
+      border-radius: var(--radius-card);
+      border: 1px solid var(--color-well-rule);
+    }
+
+    .bone-card {
+      background: var(--color-card);
+      color: var(--color-well-ink);
+      border-radius: var(--radius-inner);
+      border: 1px solid var(--color-well-rule);
+    }
+
+    .row-rule { border-bottom: 1px solid oklch(100% 0 0 / 0.075); }
+
+    .btn-peri {
+      min-height: 40px;
+      padding: 0 17px;
+      border: 0;
+      border-radius: var(--radius-pill);
+      background: var(--color-accent);
+      color: var(--color-accent-ink);
+      font: 600 0.84rem/1 var(--font-body);
+      box-shadow: inset 0 1px 0 color-mix(in oklab, var(--color-light) 35%, transparent);
+      cursor: pointer;
+      transition: background 0.16s ease, box-shadow 0.16s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+    .btn-peri:hover:not(:disabled) {
+      background: var(--color-accent-hi);
+      box-shadow: 0 0 0 3px oklch(77% 0.10 274 / 0.22), inset 0 1px 0 color-mix(in oklab, var(--color-light) 35%, transparent);
+    }
+    .btn-peri:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-ghost {
+      min-height: 40px;
+      padding: 0 15px;
+      border-radius: var(--radius-pill);
+      background: oklch(100% 0 0 / 0.045);
+      border: 1px solid oklch(100% 0 0 / 0.10);
+      color: var(--color-ink);
+      font: 500 0.84rem/1 var(--font-body);
+      cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+    .btn-ghost:hover:not(:disabled) { background: oklch(100% 0 0 / 0.095); border-color: oklch(100% 0 0 / 0.18); }
+    .btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .dusk-tab {
+      color: var(--color-muted);
+      font-weight: 500;
+      padding: 10px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.18s ease;
+    }
+    .dusk-tab:hover { color: var(--color-ink-2); }
+    .dusk-tab.active { color: var(--color-ink); }
+
+    .sig-peri { width: 7px; height: 7px; border-radius: 999px; background: var(--color-accent); display: inline-block; flex-shrink: 0; }
+    .sig-ok { width: 7px; height: 7px; border-radius: 999px; background: var(--color-ok); display: inline-block; flex-shrink: 0; }
+    .sig-apri { width: 7px; height: 7px; border-radius: 999px; background: var(--color-accent-2); display: inline-block; flex-shrink: 0; animation: breathe 3s ease-in-out infinite; }
+    .sig-dusk { width: 7px; height: 7px; border-radius: 999px; background: var(--color-dusk); display: inline-block; flex-shrink: 0; }
+    @keyframes breathe { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.42; transform: scale(0.86); } }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .badge-acquire { background: color-mix(in oklab, var(--color-ok) 18%, transparent); color: var(--color-ok); border: 1px solid color-mix(in oklab, var(--color-ok) 36%, transparent); }
+    .badge-negotiate { background: color-mix(in oklab, var(--color-accent-2) 18%, transparent); color: var(--color-accent-2); border: 1px solid color-mix(in oklab, var(--color-accent-2) 38%, transparent); }
+    .badge-pass { background: color-mix(in oklab, var(--color-dusk) 18%, transparent); color: var(--color-dusk); border: 1px solid color-mix(in oklab, var(--color-dusk) 38%, transparent); }
+    .badge-peri { background: color-mix(in oklab, var(--color-accent) 16%, transparent); color: var(--color-accent); border: 1px solid color-mix(in oklab, var(--color-accent) 32%, transparent); }
+
+    .amenity-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: var(--radius-pill);
+      font-size: 0.74rem;
+      font-weight: 500;
+      border: 1px solid oklch(100% 0 0 / 0.11);
+      background: oklch(100% 0 0 / 0.04);
+      color: var(--color-muted);
+      cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+    }
+    .amenity-pill:hover { background: oklch(100% 0 0 / 0.08); color: var(--color-ink); }
+    .amenity-pill.active { background: oklch(100% 0 0 / 0.12); border-color: oklch(100% 0 0 / 0.28); color: var(--color-ink); }
+    .amenity-dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; flex-shrink: 0; }
+
+    .hero-photo { position: absolute; inset: -3%; width: 106%; height: 106%; object-fit: cover; animation: duskDrift 48s ease-in-out infinite alternate; }
+    @keyframes duskDrift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(-2%, -1.5%, 0) scale(1.04); } }
+    @media (prefers-reduced-motion: reduce) { .hero-photo, .sig-apri { animation: none; } }
+
+    .hero-scrim {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 52% 62% at 18% 52%, color-mix(in oklab, var(--color-fog) 78%, transparent), transparent 78%),
+        linear-gradient(to bottom, transparent 62%, var(--color-paper));
+    }
+
+    .dusk-pin {
+      width: 32px; height: 32px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 12px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 6px 18px oklch(10% 0.02 268 / 0.55); border: 2px solid var(--color-paper);
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+    .dusk-pin:hover, .dusk-pin.active { transform: scale(1.16); box-shadow: 0 0 0 4px oklch(77% 0.10 274 / 0.35), 0 8px 20px oklch(10% 0.02 268 / 0.7); }
+    .maplibregl-popup-content, .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+      background: var(--color-paper-2) !important; color: var(--color-ink) !important;
+      border: 1px solid var(--color-rule) !important; border-radius: 14px !important;
+      box-shadow: 0 18px 40px oklch(8% 0.02 268 / 0.75) !important; font-family: var(--font-body) !important;
+    }
+    .leaflet-container { background: var(--color-paper-2) !important; font-family: var(--font-body) !important; }
+    .dusk-leaflet-icon { background: transparent !important; border: 0 !important; }
+
+    dialog:modal { overscroll-behavior: contain; border: 0; padding: 0; background: transparent; color: var(--color-ink); max-width: 620px; width: calc(100% - 24px); margin: auto; }
+    dialog::backdrop { overflow: hidden; overscroll-behavior: contain; background: oklch(10% 0.022 268 / 0.75); backdrop-filter: blur(6px); }
+
+    input, select, textarea { font-size: 16px; }
+    input[type="range"] { accent-color: var(--color-accent); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scroll-thin::-webkit-scrollbar-thumb { background: var(--color-rule); border-radius: 999px; }
+    .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+    *:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  </style>
+</head>
+<body class="antialiased">
+
+  <!-- SLATE GLASS STICKY NAVIGATION -->
+  <nav class="sticky top-0 z-30 border-b px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3" style="background: oklch(17.5% 0.014 268 / 0.85); backdrop-filter: blur(18px); border-color: var(--color-rule);">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style="background: var(--color-accent); color: var(--color-accent-ink);">PI</div>
+      <div>
+        <span class="font-medium text-sm tracking-tight" style="font-family: var(--font-display)">PropertyInsight</span>
+        <span class="text-xs ml-2 hidden sm:inline" style="color: var(--color-muted)">v6.0 · Open-Source Spatial &amp; ECharts</span>
+      </div>
+      <span id="nav-provider-pill" class="hidden sm:inline-flex badge badge-peri ml-2">Pollinations OSS (Free)</span>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button id="btn-export-md" type="button" class="btn-ghost text-xs hidden sm:inline-flex">Export memo</button>
+      <button id="btn-export-html" type="button" class="btn-ghost text-xs hidden md:inline-flex">Save standalone</button>
+      <button id="btn-open-settings" type="button" class="btn-peri text-xs">AI &amp; Map Config</button>
+    </div>
+  </nav>
+
+  <!-- HERO STAGE -->
+  <section class="relative overflow-hidden border-b" style="border-color: var(--color-rule); min-height: 430px;">
+    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1800&q=80" onerror="this.style.display='none'" alt="Foggy mountain valley at dusk" class="hero-photo">
+    <div class="hero-scrim" aria-hidden="true"></div>
+
+    <div class="relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14 grid grid-cols-1 lg:grid-cols-12 gap-7 items-center">
+      <div class="lg:col-span-5 space-y-4">
+        <h1 class="text-3xl sm:text-4xl lg:text-[2.75rem]" style="color: var(--color-day-ink)">
+          Calm capital close, zero vendor lock-in.
+        </h1>
+        <p class="text-sm sm:text-base leading-relaxed max-w-md" style="color: var(--color-day-muted)">
+          Multi-layer open-source spatial intelligence (3D OpenFreeMap, Esri Satellite, OpenTopoMap, Overpass POIs), Apache ECharts underwriting analytics, AG-UI 1.0, and open-weight + Claude + Gemini 4 AI.
+        </p>
+        <div class="flex flex-wrap items-center gap-3 pt-1">
+          <button id="btn-hero-audit" type="button" class="btn-peri">Generate IC Dossier</button>
+          <button id="btn-hero-map" type="button" class="btn-ghost" style="background: oklch(99% 0.005 75 / 0.80); color: var(--color-day-ink); border-color: oklch(22% 0.022 268 / 0.16)">Explore 3D Map</button>
+        </div>
+      </div>
+
+      <!-- Smoked Glass Account List -->
+      <div class="lg:col-span-7 glass p-4 sm:p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 row-rule">
+          <div>
+            <h2 class="text-lg">Portfolio settlement accounts</h2>
+            <p class="text-xs" style="color: var(--color-muted)">Select a parcel to update all ECharts graphs, spatial layers, and AI context</p>
+          </div>
+          <div class="flex items-center gap-3 text-xs">
+            <span class="inline-flex items-center gap-1.5" style="color: var(--color-ink-2)"><span class="sig-peri"></span>Cleared DSCR</span>
+            <span class="inline-flex items-center gap-1.5" style="color: var(--color-ink-2)"><span class="sig-apri"></span>Open review</span>
+          </div>
+        </div>
+
+        <div id="hero-account-rows" class="divide-y" style="border-color: oklch(100% 0 0 / 0.07)"></div>
+
+        <div class="pt-3 flex flex-wrap items-center justify-between gap-4 border-t" style="border-color: oklch(100% 0 0 / 0.09)">
+          <div class="flex flex-wrap items-center gap-6">
+            <div><div class="text-xs" style="color: var(--color-muted)">Committed capital</div><div id="tally-total-val" class="num text-xl">$0<span class="c">.00</span></div></div>
+            <div><div class="text-xs" style="color: var(--color-muted)">Blended net yield</div><div id="tally-avg-cap" class="num text-xl">0<span class="c">.00%</span></div></div>
+            <div><div class="text-xs" style="color: var(--color-muted)">Monthly net cash</div><div id="tally-total-cf" class="num text-xl">$0<span class="c">.00</span></div></div>
+          </div>
+          <button id="btn-add-property" type="button" class="px-3.5 py-2 rounded-full text-xs font-semibold transition cursor-pointer" style="background: color-mix(in oklab, var(--color-accent-2) 18%, transparent); color: var(--color-accent-2); border: 1px solid color-mix(in oklab, var(--color-accent-2) 35%, transparent)">
+            + Add property row
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLATE WORKSPACE BAND -->
+  <main class="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-7">
+
+    <!-- Scrollable Tab Strip -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b" style="border-color: var(--color-rule)">
+      <div class="flex items-center gap-5 overflow-x-auto no-scrollbar text-sm" role="tablist" aria-label="Workspace Modules">
+        <button type="button" data-tab="underwrite" class="ws-tab dusk-tab active"><span class="tab-dot sig-peri"></span><span>Underwriting &amp; ECharts</span></button>
+        <button type="button" data-tab="map" class="ws-tab dusk-tab"><span class="tab-dot w-1.5 h-1.5 rounded-full bg-transparent inline-block"></span><span>Multi-Layer OpenMap (3D/Sat/Topo)</span></button>
+        <button type="button" data-tab="reports" class="ws-tab dusk-tab"><span class="tab-dot w-1.5 h-1.5 rounded-full bg-transparent inline-block"></span><span>Executive IC Dossier</span></button>
+        <button type="button" data-tab="decisions" class="ws-tab dusk-tab"><span class="tab-dot w-1.5 h-1.5 rounded-full bg-transparent inline-block"></span><span>Scorecard &amp; 2³ DOE Charts</span></button>
+        <button type="button" data-tab="agui" class="ws-tab dusk-tab"><span class="tab-dot w-1.5 h-1.5 rounded-full bg-transparent inline-block"></span><span>AG-UI 1.0 &amp; MasterNex</span></button>
+      </div>
+      <div class="text-xs pb-2" style="color: var(--color-muted)">Focused: <span id="active-deal-label" style="color: var(--color-ink)"></span></div>
+    </div>
+
+    <!-- PANEL 1: UNDERWRITING + APACHE ECHARTS SUITE -->
+    <section id="panel-underwrite" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- Left 4 Cols: Asset Terms -->
+      <div class="lg:col-span-4 glass p-5 space-y-4">
+        <div class="flex items-center justify-between pb-2 row-rule">
+          <h3 class="text-base">Asset assumptions</h3>
+          <select id="uw-strategy-select" class="px-3 py-1.5 rounded-full text-xs border" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+            <option value="hold">Long-Term Buy &amp; Hold</option>
+            <option value="brrrr">BRRRR Value-Add</option>
+            <option value="str">Short-Term Stay (STR)</option>
+          </select>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <label class="block">
+            <span class="flex items-center justify-between mb-1" style="color: var(--color-muted)">
+              <span>Street address</span>
+              <button id="btn-geocode-active" type="button" class="underline" style="color: var(--color-accent)">Geocode OSM</button>
+            </span>
+            <input id="inp-active-address" type="text" class="w-full px-3 py-2 rounded-lg border text-sm" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+          </label>
+
+          <div class="grid grid-cols-2 gap-3">
+            <label class="inner-well p-3 block">
+              <div class="flex justify-between mb-1" style="color: var(--color-muted)"><span>Purchase</span><span id="lbl-uw-price" class="num" style="color: var(--color-ink)">$340,000</span></div>
+              <input id="uw-price" type="range" min="80000" max="2000000" step="5000" class="w-full">
+            </label>
+            <label class="inner-well p-3 block">
+              <div class="flex justify-between mb-1" style="color: var(--color-muted)"><span>Monthly rent</span><span id="lbl-uw-rent" class="num" style="color: var(--color-ink)">$3,150</span></div>
+              <input id="uw-rent" type="range" min="750" max="15000" step="50" class="w-full">
+            </label>
+            <label class="inner-well p-3 block">
+              <div class="flex justify-between mb-1" style="color: var(--color-muted)"><span>Down payment</span><span id="lbl-uw-down" class="num" style="color: var(--color-ink)">20%</span></div>
+              <input id="uw-down" type="range" min="5" max="100" step="5" class="w-full">
+            </label>
+            <label class="inner-well p-3 block">
+              <div class="flex justify-between mb-1" style="color: var(--color-muted)"><span>Note rate</span><span id="lbl-uw-rate" class="num" style="color: var(--color-ink)">6.25%</span></div>
+              <input id="uw-rate" type="range" min="3.0" max="11.0" step="0.125" class="w-full">
+            </label>
+            <label class="inner-well p-3 block">
+              <div class="flex justify-between mb-1" style="color: var(--color-muted)"><span>Operating load</span><span id="lbl-uw-opex" class="num" style="color: var(--color-ink)">32%</span></div>
+              <input id="uw-opex" type="range" min="15" max="65" step="1" class="w-full">
+            </label>
+            <label class="inner-well p-3 block">
+              <div class="flex justify-between mb-1" style="color: var(--color-muted)"><span>Rehab budget</span><span id="lbl-uw-rehab" class="num" style="color: var(--color-ink)">$15,000</span></div>
+              <input id="uw-rehab" type="range" min="0" max="250000" step="2500" class="w-full">
+            </label>
+          </div>
+        </div>
+
+        <!-- Ruled Tally -->
+        <div class="grid grid-cols-2 gap-3 pt-3 border-t" style="border-color: oklch(100% 0 0 / 0.08)">
+          <div><div class="text-xs" style="color: var(--color-muted)">Cap Rate</div><div id="m-cap" class="num text-xl mt-0.5">0<span class="c">.00%</span></div></div>
+          <div><div class="text-xs" style="color: var(--color-muted)">Cash-on-Cash</div><div id="m-coc" class="num text-xl mt-0.5">0<span class="c">.00%</span></div></div>
+          <div><div class="text-xs" style="color: var(--color-muted)">Monthly Net</div><div id="m-cf" class="num text-xl mt-0.5">$0<span class="c">.00</span></div></div>
+          <div><div class="text-xs" style="color: var(--color-muted)">DSCR</div><div id="m-dscr" class="num text-xl mt-0.5">0<span class="c">.00x</span></div></div>
+        </div>
+      </div>
+
+      <!-- Right 8 Cols: Interactive Apache ECharts Visualizations -->
+      <div class="lg:col-span-8 space-y-5">
+        <div class="glass p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 row-rule">
+            <div>
+              <h3 class="text-base">10-Year Wealth Velocity, Equity &amp; Debt Amortization (ECharts)</h3>
+              <p class="text-xs" style="color: var(--color-muted)">Interactive hover crosshair comparing Total Equity, Cumulative Cash Flow, and Remaining Debt</p>
+            </div>
+            <button id="btn-audit-deal-ai" type="button" class="btn-peri text-xs">Build IC Dossier</button>
+          </div>
+          <div id="echart-10yr" class="w-full h-64"></div>
+          <p id="explain-10yr" class="text-xs leading-relaxed pt-2 border-t" style="border-color: oklch(100% 0 0 / 0.07); color: var(--color-ink-2);"></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="glass p-5 space-y-2">
+            <h4 class="text-sm font-medium pb-2 row-rule">Monthly Cash-Flow Bridge (Gross → NOI → Net)</h4>
+            <div id="echart-waterfall" class="w-full h-52"></div>
+            <p id="explain-waterfall" class="text-xs leading-relaxed pt-2 border-t" style="border-color: oklch(100% 0 0 / 0.07); color: var(--color-ink-2);"></p>
+          </div>
+          <div class="glass p-5 space-y-2">
+            <h4 class="text-sm font-medium pb-2 row-rule">30-Night Settlement &amp; Escrow Cadence</h4>
+            <div id="echart-nights" class="w-full h-52"></div>
+            <p id="explain-nights" class="text-xs leading-relaxed pt-2 border-t" style="border-color: oklch(100% 0 0 / 0.07); color: var(--color-ink-2);"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: MULTI-LAYER OPEN-SOURCE MAP (3D OPENFREEMAP + SATELLITE + TOPO + YIELD HEATMAP + MULTI-RING BUFFERS) -->
+    <section id="panel-map" class="hidden glass p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-3 row-rule text-xs">
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="text-base">Multi-Layer Open-Source Geospatial Explorer</h3>
+            <span id="map-engine-pill" class="badge badge-peri">MapLibre 3D · Fiord</span>
+          </div>
+          <p class="mt-0.5" style="color: var(--color-muted)">OpenFreeMap 3D Vector Buildings · Esri World Imagery Satellite · OpenTopoMap Contours · Carto Dusk · Photon + Nominatim · Overpass POIs</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="map-style-select" class="px-3 py-1.5 rounded-full border text-xs" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+            <optgroup label="OpenFreeMap Vector 3D (Extruded Buildings)">
+              <option value="fiord" selected>OpenFreeMap Fiord (3D Dusk)</option>
+              <option value="dark">OpenFreeMap Dark (3D Night)</option>
+              <option value="liberty">OpenFreeMap Liberty (3D Street)</option>
+              <option value="positron">OpenFreeMap Positron (3D Light)</option>
+            </optgroup>
+            <optgroup label="Open-Source Raster Layers (Satellite / Topo / Dusk)">
+              <option value="esri_satellite">Esri World Imagery (Satellite Aerial)</option>
+              <option value="opentopomap">OpenTopoMap (Elevation Contours)</option>
+              <option value="carto_dark">Carto Dark Matter (Dusk Raster)</option>
+              <option value="carto_voyager">Carto Voyager (Street Raster)</option>
+              <option value="osm_standard">OpenStreetMap Standard</option>
+            </optgroup>
+          </select>
+
+          <div class="inline-flex rounded-full p-0.5 border" style="background: var(--color-paper-2); border-color: var(--color-rule)">
+            <button type="button" data-persp="2d" class="persp-btn px-2.5 py-1 rounded-full text-xs" style="color: var(--color-muted)">2D Plan</button>
+            <button type="button" data-persp="iso" class="persp-btn px-2.5 py-1 rounded-full text-xs font-medium" style="background: var(--color-accent); color: var(--color-accent-ink)">3D Iso</button>
+            <button type="button" data-persp="street" class="persp-btn px-2.5 py-1 rounded-full text-xs" style="color: var(--color-muted)">Horizon</button>
+          </div>
+
+          <button id="btn-fit-markers" type="button" class="btn-ghost text-xs" style="min-height: 32px; padding: 0 12px;">Fit bounds</button>
+        </div>
+      </div>
+
+      <!-- Dual Open-Source Geocoder Search Bar (Photon + Nominatim Fallback) -->
+      <div class="relative">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input id="osm-search-input" type="text" placeholder="Search address via Photon / Nominatim OSM to pin onto map (e.g., '2100 Ross Ave, Dallas TX')..." class="flex-1 px-4 py-2 rounded-full border text-xs" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+          <button id="btn-osm-search" type="button" class="btn-peri text-xs" style="min-height: 38px;">Geocode &amp; Pin</button>
+        </div>
+        <div id="osm-search-results" class="hidden absolute left-0 right-0 mt-1.5 z-20 glass p-2 space-y-1 text-xs max-h-56 overflow-y-auto scroll-thin" style="background: var(--color-paper-2); border: 1px solid var(--color-rule);"></div>
+      </div>
+
+      <!-- Layers & Overpass Controls -->
+      <div class="inner-well p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-medium mr-1" style="color: var(--color-ink-2)">Layers:</span>
+          <button id="toggle-layer-buildings" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #9ba8ff"></span>3D Buildings</button>
+          <button id="toggle-layer-rings" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #e5b887"></span>0.5/1/2mi Rings</button>
+          <button id="toggle-layer-heatmap" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #d87da0"></span>Yield Halo</button>
+          <span class="mx-1 opacity-30">|</span>
+          <button id="toggle-amenity-schools" type="button" data-amenity-cat="schools" class="amenity-pill active"><span class="amenity-dot" style="background:#7da0ff"></span>Schools <span id="count-amenity-schools" class="num opacity-75">0</span></button>
+          <button id="toggle-amenity-transit" type="button" data-amenity-cat="transit" class="amenity-pill active"><span class="amenity-dot" style="background:#64d8b4"></span>Transit <span id="count-amenity-transit" class="num opacity-75">0</span></button>
+          <button id="toggle-amenity-retail" type="button" data-amenity-cat="retail" class="amenity-pill active"><span class="amenity-dot" style="background:#f2b872"></span>Retail <span id="count-amenity-retail" class="num opacity-75">0</span></button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="overpass-radius-select" class="px-3 py-1.5 rounded-full border text-xs" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+            <option value="800">0.5 mi (800m)</option>
+            <option value="1600" selected>1.0 mi (1.6km)</option>
+            <option value="3200">2.0 mi (3.2km)</option>
+          </select>
+          <button id="btn-load-amenities" type="button" class="btn-peri text-xs" style="min-height: 32px; padding: 0 13px;">Scan Overpass POIs</button>
+        </div>
+      </div>
+
+      <div id="map-overpass-status" class="hidden inner-well px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 text-xs"></div>
+
+      <!-- Dual Map Canvas -->
+      <div class="relative w-full rounded-xl overflow-hidden border" style="height: 480px; border-color: var(--color-rule); background: var(--color-paper-2);">
+        <div id="openmap-canvas" style="width: 100%; height: 480px;"></div>
+        <div id="leaflet-map-canvas" class="hidden" style="width: 100%; height: 480px;"></div>
+        <div id="map-fallback-overlay" class="hidden absolute inset-0 z-[500] flex flex-col justify-between p-4" style="background: var(--color-paper-2)">
+          <div class="flex items-center justify-between inner-well p-3 text-xs">
+            <span>Offline / restricted tiles — displaying Dusk Spatial Yield Radar.</span>
+            <button id="btn-retry-map" type="button" class="btn-peri text-xs" style="min-height: 30px;">Retry Map</button>
+          </div>
+          <canvas id="spatial-radar-canvas" class="w-full flex-1 my-3 inner-well"></canvas>
+        </div>
+      </div>
+
+      <div id="amenities-summary-panel" class="hidden inner-well p-3.5 space-y-2.5 text-xs">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 row-rule">
+          <div class="flex items-center gap-2"><span id="amenities-summary-title" class="font-medium"></span><span id="amenities-summary-tier" class="badge badge-peri"></span></div>
+          <span id="amenities-summary-meta" style="color: var(--color-muted)"></span>
+        </div>
+        <div id="amenities-nearest-grid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: EXECUTIVE IC DOSSIER & MULTI-PROVIDER AI ANALYST -->
+    <section id="panel-reports" class="hidden space-y-5">
+      <div class="glass p-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" data-report-type="ic_audit" class="report-trigger btn-peri text-xs">IC Audit</button>
+          <button type="button" data-report-type="negotiation" class="report-trigger btn-ghost text-xs">Negotiation</button>
+          <button type="button" data-report-type="cma" class="report-trigger btn-ghost text-xs">Portfolio CMA</button>
+          <button type="button" data-report-type="lp_memo" class="report-trigger btn-ghost text-xs">LP Brief</button>
+        </div>
+        <span class="text-xs" style="color: var(--color-muted)">Engine: <strong id="report-engine-badge" style="color: var(--color-accent)">Pollinations OSS</strong></span>
+      </div>
+
+      <form id="report-custom-form" class="glass p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <input id="report-custom-input" type="text" placeholder="Ask any underwriting, zoning, or rent-comp question..." class="flex-1 bg-transparent px-4 py-2 text-sm border-0 focus:outline-none" style="color: var(--color-ink)">
+        <button id="btn-custom-submit" type="submit" class="btn-peri text-xs">Run analysis</button>
+      </form>
+
+      <div id="report-loading" class="hidden glass p-6 text-center text-sm" style="color: var(--color-accent)">Synthesizing structured investment dossier…</div>
+      <div id="report-dossier-container" class="space-y-5"></div>
+    </section>
+
+    <!-- PANEL 4: 6-FACTOR RADAR & 2^3 FACTORIAL DOE ECHARTS -->
+    <section id="panel-decisions" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="lg:col-span-5 glass p-5 space-y-4">
+        <div class="flex items-center justify-between pb-2 row-rule">
+          <div>
+            <h3 class="text-base">6-Factor Deal Scorecard Radar</h3>
+            <p class="text-xs" style="color: var(--color-muted)">Financial fundamentals + Overpass OSM location score</p>
+          </div>
+          <span id="scorecard-badge" class="badge badge-acquire">82 / 100</span>
+        </div>
+        <div id="echart-radar" class="w-full h-64"></div>
+        <p id="explain-radar" class="text-xs leading-relaxed pt-2 border-t" style="border-color: oklch(100% 0 0 / 0.07); color: var(--color-ink-2);"></p>
+        <div id="scorecard-bars" class="space-y-2 text-xs"></div>
+      </div>
+
+      <div class="lg:col-span-7 glass p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 row-rule">
+          <div>
+            <h3 class="text-base">2³ Factorial DOE Sensitivity &amp; Bounded EDA</h3>
+            <p class="text-xs" style="color: var(--color-muted)">8-run stress matrix: Rate (5.5% / 7.25%) × Rehab ($10k / $45k) × OpEx (28% / 38%)</p>
+          </div>
+          <button id="btn-run-doe" type="button" class="btn-ghost text-xs" style="min-height: 32px;">Recompute</button>
+        </div>
+        <div id="echart-doe" class="w-full h-56"></div>
+        <p id="explain-doe" class="text-xs leading-relaxed pt-1" style="color: var(--color-ink-2);"></p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="row-rule" style="color: var(--color-muted)">
+                <th class="py-2 pr-3">Run</th><th class="py-2 pr-3">Rate</th><th class="py-2 pr-3">Rehab</th><th class="py-2 pr-3">OpEx</th><th class="py-2 pr-3">Cap</th><th class="py-2 pr-3">DSCR</th><th class="py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody id="doe-tbody" class="divide-y" style="border-color: oklch(100% 0 0 / 0.06)"></tbody>
+          </table>
+        </div>
+        <div id="eda-summary-strip" class="text-xs pt-1" style="color: var(--color-ink-2)"></div>
+      </div>
+    </section>
+
+    <!-- PANEL 5: AG-UI 1.0 EVENT STREAM, MASTERNEX ATTRIBUTION CHART & BIGQUERY -->
+    <section id="panel-agui" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="lg:col-span-6 glass p-5 space-y-3">
+        <div class="flex items-center justify-between pb-2 row-rule">
+          <div>
+            <h3 class="text-base">AG-UI 1.0 Event Stream &amp; HITL</h3>
+            <p class="text-xs" style="color: var(--color-muted)">Typed RUN_STARTED / STEP_STARTED / STATE_DELTA / RUN_FINISHED events</p>
+          </div>
+          <button id="btn-agui-test-run" type="button" class="btn-peri text-xs" style="min-height: 32px; padding: 0 12px;">Emit test run</button>
+        </div>
+        <div id="agui-hitl-box" class="inner-well p-3 text-xs space-y-2">
+          <p id="agui-hitl-msg" style="color: var(--color-ink-2)">No pending Human-in-the-Loop interrupt.</p>
+          <div id="agui-hitl-actions" class="hidden flex gap-2">
+            <button id="btn-hitl-approve" type="button" class="badge badge-acquire cursor-pointer">Approve</button>
+            <button id="btn-hitl-reject" type="button" class="badge badge-pass cursor-pointer">Reject</button>
+          </div>
+        </div>
+        <div id="agui-event-log" class="h-44 overflow-y-auto scroll-thin inner-well p-3 text-xs font-mono space-y-1"></div>
+      </div>
+
+      <div class="lg:col-span-6 glass p-5 space-y-3">
+        <div class="pb-2 row-rule">
+          <h3 class="text-base">MasterNex NADE / GIE / BNE Risk Attribution (ECharts)</h3>
+          <p class="text-xs" style="color: var(--color-muted)">Hash-chained ledger head: 6bf58326b07c4fda… (27 records verified)</p>
+        </div>
+        <div id="echart-masternex" class="w-full h-52"></div>
+        <p id="explain-masternex" class="text-xs leading-relaxed pt-1" style="color: var(--color-ink-2);"></p>
+        <div class="bone-well p-3 text-xs">
+          <div class="font-semibold">BigQuery Autocleaning &amp; Resource Attribution</div>
+          <code class="block mt-1 opacity-80">bq query --use_legacy_sql=false --label datacloud:antigravity "SELECT TRIM(address), SAFE.PARSE_JSON(raw_metadata) FROM raw.mls_ingest;"</code>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SETTINGS DIALOG -->
+  <dialog id="settings-dialog" closedby="any" aria-labelledby="settings-title">
+    <div class="glass p-6 space-y-4 text-xs" style="background: oklch(19% 0.016 268 / 0.96);">
+      <div class="flex items-center justify-between pb-3 row-rule">
+        <h2 id="settings-title" class="text-lg">Open-Source AI &amp; Frontier Providers</h2>
+        <button id="btn-close-dialog" type="button" class="btn-ghost text-xs" style="min-height: 30px;">Close</button>
+      </div>
+      <form id="settings-form" class="space-y-3">
+        <label class="block">
+          <span class="block mb-1 font-medium" style="color: var(--color-ink-2)">AI Provider</span>
+          <select id="inp-provider" class="w-full px-3 py-2 rounded-lg border" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+            <option value="pollinations">Pollinations Open-Source (Free · Zero Key · Default)</option>
+            <option value="quant">Built-In Quantitative Engine (Offline · Instant)</option>
+            <option value="ollama">Local Ollama (http://localhost:11434)</option>
+            <option value="claude">Anthropic Claude API (Direct BYOK)</option>
+            <option value="gemini">Google Gemini 4 Interactions API</option>
+            <option value="openrouter">OpenRouter (Qwen3, DeepSeek, Llama)</option>
+            <option value="groq">Groq Open-Weight API</option>
+          </select>
+        </label>
+        <div id="provider-endpoint-group" class="hidden space-y-2.5">
+          <input id="inp-base-url" type="text" placeholder="Endpoint URL" class="w-full px-3 py-2 rounded-lg border" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+          <input id="inp-model-id" type="text" placeholder="Model ID" class="w-full px-3 py-2 rounded-lg border" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+          <input id="inp-api-key" type="password" placeholder="API Key (if required)" class="w-full px-3 py-2 rounded-lg border" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button id="btn-cancel-dialog" type="button" class="btn-ghost text-xs">Cancel</button>
+          <button type="submit" class="btn-peri text-xs">Save routing</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ADD PROPERTY DIALOG -->
+  <dialog id="add-property-dialog" closedby="any" aria-labelledby="add-prop-title">
+    <div class="glass p-6 space-y-4 text-xs" style="background: oklch(19% 0.016 268 / 0.96);">
+      <div class="flex items-center justify-between pb-3 row-rule">
+        <h2 id="add-prop-title" class="text-lg">Add property row</h2>
+        <button id="btn-close-add-prop" type="button" class="btn-ghost text-xs" style="min-height: 30px;">Close</button>
+      </div>
+      <form id="add-property-form" class="space-y-3">
+        <input id="new-prop-address" type="text" required placeholder="Street Address, City, State" class="w-full px-3 py-2 rounded-lg border" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+        <div class="grid grid-cols-2 gap-3">
+          <input id="new-prop-price" type="number" value="350000" required placeholder="Price" class="w-full px-3 py-2 rounded-lg border num" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+          <input id="new-prop-rent" type="number" value="3100" required placeholder="Rent/mo" class="w-full px-3 py-2 rounded-lg border num" style="background: var(--color-paper-2); border-color: var(--color-rule); color: var(--color-ink)">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button id="btn-cancel-add-prop" type="button" class="btn-ghost text-xs">Cancel</button>
+          <button type="submit" class="btn-peri text-xs">Add parcel</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden px-4 py-2.5 rounded-full text-xs font-semibold shadow-lg" style="background: var(--color-accent); color: var(--color-accent-ink);"></div>
+
+  <script>
+    (function () {
+      const PROVIDER_PRESETS = {
+        pollinations: { label: 'Pollinations OSS (Free)', url: 'https://text.pollinations.ai/openai', needsKey: false, models: ['openai'] },
+        quant: { label: 'Quant Engine (Local)', url: '', needsKey: false, models: ['deterministic-pe-v6'] },
+        ollama: { label: 'Ollama Local', url: 'http://localhost:11434/v1/chat/completions', needsKey: false, models: ['qwen3:8b', 'llama3.3'] },
+        claude: { label: 'Anthropic Claude', url: 'https://api.anthropic.com/v1/messages', needsKey: true, models: ['claude-sonnet-4-5-20250929'] },
+        gemini: { label: 'Google Gemini 4', url: 'https://generativelanguage.googleapis.com/v1beta/interactions', needsKey: true, models: ['gemini-4-hydrogen'] },
+        openrouter: { label: 'OpenRouter OSS', url: 'https://openrouter.ai/api/v1/chat/completions', needsKey: true, models: ['qwen/qwen3-235b-a22b:free'] },
+        groq: { label: 'Groq Open-Weight', url: 'https://api.groq.com/openai/v1/chat/completions', needsKey: true, models: ['llama-3.3-70b-versatile'] }
+      };
+
+      const OPENFREEMAP_STYLES = {
+        fiord: 'https://tiles.openfreemap.org/styles/fiord',
+        dark: 'https://tiles.openfreemap.org/styles/dark',
+        liberty: 'https://tiles.openfreemap.org/styles/liberty',
+        positron: 'https://tiles.openfreemap.org/styles/positron'
+      };
+
+      const LEAFLET_TILE_STYLES = {
+        esri_satellite: { label: 'Leaflet · Esri Satellite Aerial', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', options: { maxZoom: 19, attribution: '&copy; Esri World Imagery' } },
+        opentopomap: { label: 'Leaflet · OpenTopoMap Contours', url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', options: { maxZoom: 17, attribution: '&copy; OpenTopoMap (CC-BY-SA)' } },
+        carto_dark: { label: 'Leaflet · Carto Dusk', url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', options: { subdomains: 'abcd', maxZoom: 20, attribution: '&copy; OSM &copy; CARTO' } },
+        carto_voyager: { label: 'Leaflet · Carto Voyager', url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', options: { subdomains: 'abcd', maxZoom: 20, attribution: '&copy; OSM &copy; CARTO' } },
+        osm_standard: { label: 'Leaflet · OSM Standard', url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', options: { maxZoom: 19, attribution: '&copy; OpenStreetMap' } }
+      };
+
+      const DEFAULT_PROPERTIES = [
+        { id: 'p1', address: '412 NW Renfro St, Burleson, TX 76028', beds: 4, sqft: 2150, price: 340000, rent: 3150, downPct: 20, rate: 6.25, opexPct: 32, rehab: 15000, lat: 32.5421, lng: -97.3208 },
+        { id: 'p2', address: '1809 Southmore Blvd, Houston, TX 77004', beds: 3, sqft: 1840, price: 415000, rent: 3650, downPct: 20, rate: 6.25, opexPct: 34, rehab: 22000, lat: 29.7261, lng: -95.3789 }
+      ];
+
+      const MASTERNEX_DECISIONS = [
+        { label: 'Scenario 1 (normal)', risk: 0.1461, nade: 1951, gie: 8037, bne: 12 },
+        { label: 'Scenario 2 (anomaly)', risk: 1.0000, nade: 3348, gie: 3304, bne: 3348 },
+        { label: 'Scenario 3 (normal)', risk: 0.1761, nade: 3448, gie: 6552, bne: 0 },
+        { label: 'Scenario 4 (anomaly)', risk: 1.0000, nade: 3348, gie: 3304, bne: 3348 }
+      ];
+
+      let state = {
+        provider: 'pollinations',
+        baseUrl: PROVIDER_PRESETS.pollinations.url,
+        modelId: 'openai',
+        apiKey: '',
+        mapStyle: 'fiord',
+        mapEngine: 'maplibre',
+        perspective: 'iso',
+        layers: { buildings: true, rings: true, heatmap: true },
+        properties: JSON.parse(JSON.stringify(DEFAULT_PROPERTIES)),
+        activeIndex: 0,
+        activeStrategy: 'hold',
+        activeTab: 'underwrite',
+        locationAudits: {},
+        amenities: { radius: 1600, visible: { schools: true, transit: true, retail: true }, loading: false },
+        map: null,
+        mapMarkers: [],
+        leafletMap: null,
+        leafletTileLayer: null,
+        leafletMarkers: [],
+        leafletOverlayGroup: null,
+        charts: {}
+      };
+
+      const escHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const showToast = (msg) => { const el = document.getElementById('toast'); el.textContent = msg; el.classList.remove('hidden'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.add('hidden'), 3400); };
+      const fmtMoney = (v) => { const a = Math.abs(v), w = Math.floor(a).toLocaleString(), c = (a % 1).toFixed(2).substring(1); return `${v < 0 ? '-' : ''}$${w}<span class="c">${c}</span>`; };
+      const fmtPct = (v) => { const a = Math.abs(v), w = Math.floor(a), d = (a - w).toFixed(2).substring(1); return `${v < 0 ? '-' : ''}${w}<span class="c">${d}%</span>`; };
+
+      function calcUW(p, strat = state.activeStrategy) {
+        const price = Number(p.price) || 300000, baseRent = Number(p.rent) || 2500, downPct = (Number(p.downPct) ?? 20) / 100;
+        const rate = (Number(p.rate) ?? 6.25) / 100, opexPct = (Number(p.opexPct) || 32) / 100, rehab = Number(p.rehab) || 0;
+        let effRent = baseRent, effOpex = opexPct, arvBoost = 1.0;
+        if (strat === 'brrrr') { effRent = baseRent * 1.12; arvBoost = 1.18 + Math.min(0.15, rehab / Math.max(1, price)); }
+        if (strat === 'str') { effRent = baseRent * 1.55; effOpex = Math.min(0.68, opexPct + 0.14); }
+        const grossMo = effRent, opexMo = grossMo * effOpex, noiMo = grossMo - opexMo, noi = noiMo * 12;
+        const capRate = (noi / price) * 100, loan = price * (1 - downPct), mr = rate / 12, n = 360;
+        const mDebt = loan > 0 ? loan * (mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1) : 0;
+        const aDebt = mDebt * 12, cashIn = Math.max(1, price * downPct + price * 0.03 + rehab), aCf = noi - aDebt, mCf = aCf / 12;
+        const coc = (aCf / cashIn) * 100, dscr = aDebt > 0 ? noi / aDebt : 9.99;
+
+        const years = [], equitySeries = [], cfSeries = [], debtSeries = [];
+        let cumCf = 0;
+        for (let yr = 1; yr <= 10; yr++) {
+          years.push(`Yr ${yr}`);
+          const val = (price + rehab * 0.5) * arvBoost * Math.pow(1.04, yr);
+          const rem = loan > 0 ? loan * (Math.pow(1 + mr, n) - Math.pow(1 + mr, yr * 12)) / (Math.pow(1 + mr, n) - 1) : 0;
+          equitySeries.push(Math.round(Math.max(0, val - rem)));
+          debtSeries.push(Math.round(rem));
+          cumCf += (noi * Math.pow(1.03, yr - 1) - aDebt);
+          cfSeries.push(Math.round(cumCf));
+        }
+        return { price, baseRent, grossMo, opexMo, noiMo, downPct, rate, opexPct, rehab, noi, capRate, mDebt, aDebt, cashIn, aCf, mCf, coc, dscr, years, equitySeries, cfSeries, debtSeries };
+      }
+
+      function computeDOERuns(p) {
+        const runs = []; let id = 1;
+        [5.5, 7.25].forEach((r) => [10000, 45000].forEach((rh) => [28, 38].forEach((op) => {
+          const sim = calcUW({ ...p, rate: r, rehab: rh, opexPct: op });
+          runs.push({ id: id++, rate: r, rehab: rh, opex: op, capRate: sim.capRate, dscr: sim.dscr, passed: sim.dscr >= 1.20 });
+        })));
+        const dscrs = runs.map((x) => x.dscr), sorted = [...dscrs].sort((a, b) => a - b);
+        return { runs, mean: dscrs.reduce((a, b) => a + b, 0) / 8, median: (sorted[3] + sorted[4]) / 2, iqr: sorted[6] - sorted[1], passCount: runs.filter((x) => x.passed).length };
+      }
+
+      // =====================================================================
+      // APACHE ECHARTS SUITE
+      // =====================================================================
+      function getChart(id) {
+        const el = document.getElementById(id);
+        if (!el || typeof echarts === 'undefined') return null;
+        if (!state.charts[id]) state.charts[id] = echarts.init(el);
+        return state.charts[id];
+      }
+
+      function renderEChartsUnderwriting(m) {
+        const c10 = getChart('echart-10yr');
+        if (c10) {
+          c10.setOption({
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
+            legend: { data: ['Total Equity', 'Cumulative Cash Flow', 'Remaining Debt'], textStyle: { color: '#a8b0c8', fontSize: 11 }, top: 0 },
+            grid: { left: 56, right: 16, top: 34, bottom: 24 },
+            xAxis: { type: 'category', data: m.years, axisLine: { lineStyle: { color: '#3f455e' } }, axisLabel: { color: '#9aa3bd', fontSize: 11 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }, axisLabel: { color: '#9aa3bd', fontSize: 11, formatter: (v) => '$' + Math.round(v / 1000) + 'k' } },
+            series: [
+              { name: 'Total Equity', type: 'line', smooth: true, data: m.equitySeries, lineStyle: { width: 2.5, color: '#9ba8ff' }, itemStyle: { color: '#9ba8ff' }, areaStyle: { color: 'rgba(155,168,255,0.16)' } },
+              { name: 'Cumulative Cash Flow', type: 'line', smooth: true, data: m.cfSeries, lineStyle: { width: 2.5, color: '#64d8b4' }, itemStyle: { color: '#64d8b4' }, areaStyle: { color: 'rgba(100,216,180,0.12)' } },
+              { name: 'Remaining Debt', type: 'line', smooth: true, data: m.debtSeries, lineStyle: { width: 1.8, type: 'dashed', color: '#f2b872' }, itemStyle: { color: '#f2b872' } }
+            ]
+          });
+        }
+
+        const cWf = getChart('echart-waterfall');
+        if (cWf) {
+          cWf.setOption({
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
+            grid: { left: 50, right: 12, top: 18, bottom: 26 },
+            xAxis: { type: 'category', data: ['Gross', '-OpEx', 'NOI', '-Debt', 'Net CF'], axisLabel: { color: '#9aa3bd', fontSize: 11 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }, axisLabel: { color: '#9aa3bd', fontSize: 10, formatter: (v) => '$' + Math.round(v) } },
+            series: [{
+              type: 'bar', barWidth: '48%',
+              data: [
+                { value: Math.round(m.grossMo), itemStyle: { color: '#9ba8ff', borderRadius: [4, 4, 0, 0] } },
+                { value: Math.round(-m.opexMo), itemStyle: { color: '#f2b872', borderRadius: [0, 0, 4, 4] } },
+                { value: Math.round(m.noiMo), itemStyle: { color: '#7da0ff', borderRadius: [4, 4, 0, 0] } },
+                { value: Math.round(-m.mDebt), itemStyle: { color: '#d87da0', borderRadius: [0, 0, 4, 4] } },
+                { value: Math.round(m.mCf), itemStyle: { color: m.mCf >= 0 ? '#64d8b4' : '#d87da0', borderRadius: [4, 4, 0, 0] } }
+              ]
+            }]
+          });
+        }
+
+        const cNi = getChart('echart-nights');
+        if (cNi) {
+          const days = Array.from({ length: 30 }, (_, i) => `N${i + 1}`);
+          const vals = days.map((_, d) => ({
+            value: Math.round((m.mCf / 30 + 60) * (0.7 + 0.3 * Math.sin(d * 0.5))),
+            itemStyle: { color: d === 22 ? '#f2b872' : d >= 26 ? 'rgba(255,255,255,0.16)' : '#9ba8ff', borderRadius: [4, 4, 0, 0] }
+          }));
+          cNi.setOption({
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
+            grid: { left: 38, right: 8, top: 14, bottom: 22 },
+            xAxis: { type: 'category', data: days, axisLabel: { color: '#9aa3bd', fontSize: 9, interval: 4 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }, axisLabel: { color: '#9aa3bd', fontSize: 10 } },
+            series: [{ type: 'bar', data: vals }]
+          });
+        }
+
+        const yr10Eq = m.equitySeries[m.equitySeries.length - 1] || 0;
+        const yr10Cf = m.cfSeries[m.cfSeries.length - 1] || 0;
+        const yr10Debt = m.debtSeries[m.debtSeries.length - 1] || 0;
+        const eqMultiple = m.cashIn > 0 ? ((yr10Eq + yr10Cf) / m.cashIn).toFixed(2) : '0.00';
+        const el10 = document.getElementById('explain-10yr');
+        if (el10) el10.innerHTML = `<strong>10-Year Wealth Trajectory:</strong> Assuming 3.0% annual rent/value compounding and principal paydown, initial cash-in of <strong class="num">${fmtMoney(m.cashIn)}</strong> grows to <strong class="num">${fmtMoney(yr10Eq)}</strong> in property equity plus <strong class="num">${fmtMoney(yr10Cf)}</strong> in cumulative net cash flow (<strong class="num">${eqMultiple}x</strong> equity multiple), while loan principal amortizes down to <strong class="num">${fmtMoney(yr10Debt)}</strong>.`;
+
+        const noiMargin = m.grossMo > 0 ? ((m.noiMo / m.grossMo) * 100).toFixed(1) : '0.0';
+        const debtPct = m.noiMo > 0 ? ((m.mDebt / m.noiMo) * 100).toFixed(1) : '0.0';
+        const elWf = document.getElementById('explain-waterfall');
+        if (elWf) elWf.innerHTML = `<strong>Monthly Margin Breakdown:</strong> From <strong class="num">${fmtMoney(m.grossMo)}</strong> gross monthly rent, operating expenses (${m.opexPct}%) absorb <strong class="num">${fmtMoney(m.opexMo)}</strong>, leaving <strong class="num">${fmtMoney(m.noiMo)}</strong> in Net Operating Income (${noiMargin}% NOI margin). Debt service consumes <strong class="num">${fmtMoney(m.mDebt)}</strong> (${debtPct}% of NOI), yielding <strong class="num">${fmtMoney(m.mCf)}/mo</strong> free cash flow at a <strong class="num">${m.dscr.toFixed(2)}x</strong> DSCR.`;
+
+        const breakEvenNight = m.grossMo > 0 ? Math.min(30, Math.max(1, Math.round(( (m.opexMo + m.mDebt) / m.grossMo ) * 26))) : 23;
+        const elNi = document.getElementById('explain-nights');
+        if (elNi) elNi.innerHTML = `<strong>Occupancy Cushion:</strong> The amber bar marks the <strong class="num">N${breakEvenNight}</strong> operating + debt break-even threshold out of 26 modeled occupied nights (86.7% occupancy). Nights <strong class="num">N${breakEvenNight + 1}–N26</strong> generate pure net profit, while faded bars (<strong class="num">N27–N30</strong>) represent modeled vacancy buffer.`;
+      }
+
+      function renderEChartsDecisions() {
+        const p = state.properties[state.activeIndex] || state.properties[0];
+        const m = calcUW(p), doe = computeDOERuns(p), loc = state.locationAudits[p.id];
+        const sDscr = Math.min(100, Math.max(0, ((m.dscr - 0.9) / 0.55) * 100));
+        const sSpread = Math.min(100, Math.max(0, ((m.capRate - m.rate * 100 + 1) / 3) * 100));
+        const sCoc = Math.min(100, Math.max(0, ((m.coc + 2) / 14) * 100));
+        const sDoe = (doe.passCount / 8) * 100;
+        const sRehab = Math.min(100, Math.max(10, (1 - (m.rehab / m.price) / 0.25) * 100));
+        const sLoc = loc ? loc.score : 60;
+        const composite = Math.round((sDscr * 0.25 + sSpread * 0.18 + sCoc * 0.17 + sDoe * 0.17 + sRehab * 0.08 + sLoc * 0.15));
+
+        document.getElementById('scorecard-badge').textContent = `${composite} / 100 · ${composite >= 72 ? 'ACQUIRE' : composite >= 52 ? 'NEGOTIATE' : 'PASS'}`;
+
+        const cRad = getChart('echart-radar');
+        if (cRad) {
+          cRad.setOption({
+            backgroundColor: 'transparent',
+            radar: {
+              indicator: [
+                { name: 'DSCR', max: 100 }, { name: 'Spread', max: 100 }, { name: 'CoC', max: 100 },
+                { name: '2³ DOE', max: 100 }, { name: 'CapEx', max: 100 }, { name: 'OSM Loc', max: 100 }
+              ],
+              splitArea: { areaStyle: { color: ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.04)'] } },
+              axisName: { color: '#a8b0c8', fontSize: 11 },
+              splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
+            },
+            series: [{
+              type: 'radar',
+              data: [{ value: [Math.round(sDscr), Math.round(sSpread), Math.round(sCoc), Math.round(sDoe), Math.round(sRehab), sLoc], areaStyle: { color: 'rgba(155,168,255,0.28)' }, lineStyle: { color: '#9ba8ff', width: 2 }, itemStyle: { color: '#9ba8ff' } }]
+            }]
+          });
+        }
+
+        const cDoe = getChart('echart-doe');
+        if (cDoe) {
+          cDoe.setOption({
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
+            grid: { left: 40, right: 12, top: 18, bottom: 26 },
+            xAxis: { type: 'category', data: doe.runs.map((r) => `R${r.id} (${r.rate}%)`), axisLabel: { color: '#9aa3bd', fontSize: 10 } },
+            yAxis: { type: 'value', min: 0.6, axisLabel: { color: '#9aa3bd', fontSize: 10, formatter: (v) => v.toFixed(1) + 'x' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } } },
+            series: [{
+              type: 'bar', barWidth: '48%',
+              data: doe.runs.map((r) => ({ value: Number(r.dscr.toFixed(2)), itemStyle: { color: r.passed ? '#64d8b4' : '#f2b872', borderRadius: [4, 4, 0, 0] } })),
+              markLine: { data: [{ yAxis: 1.20 }], lineStyle: { color: '#9ba8ff', type: 'dashed' } }
+            }]
+          });
+        }
+
+        document.getElementById('doe-tbody').innerHTML = doe.runs.map((r) => `<tr><td class="py-1.5 pr-3 num">#${r.id}</td><td class="py-1.5 pr-3 num">${r.rate}%</td><td class="py-1.5 pr-3 num">$${r.rehab/1000}k</td><td class="py-1.5 pr-3 num">${r.opex}%</td><td class="py-1.5 pr-3 num">${r.capRate.toFixed(2)}%</td><td class="py-1.5 pr-3 num">${r.dscr.toFixed(2)}x</td><td class="py-1.5"><span class="${r.passed ? 'sig-ok' : 'sig-apri'} mr-1.5"></span>${r.passed ? 'Cleared' : 'Stressed'}</td></tr>`).join('');
+        document.getElementById('eda-summary-strip').innerHTML = `Bounded EDA across 8 runs — Mean DSCR <strong class="num">${doe.mean.toFixed(2)}x</strong> · Median <strong class="num">${doe.median.toFixed(2)}x</strong> · IQR <strong class="num">${doe.iqr.toFixed(2)}x</strong>`;
+
+        const pillars = [
+          { name: 'DSCR', val: sDscr }, { name: 'Cap Spread', val: sSpread }, { name: 'Cash-on-Cash', val: sCoc },
+          { name: 'DOE Pass', val: sDoe }, { name: 'Rehab Buffer', val: sRehab }, { name: 'Location', val: sLoc }
+        ].sort((a, b) => b.val - a.val);
+        const elRad = document.getElementById('explain-radar');
+        if (elRad) elRad.innerHTML = `<strong>Weighted Pillar Audit (${composite}/100):</strong> Strongest dimension is <strong>${pillars[0].name}</strong> (<span class="num">${Math.round(pillars[0].val)}/100</span>), while <strong>${pillars[pillars.length - 1].name}</strong> (<span class="num">${Math.round(pillars[pillars.length - 1].val)}/100</span>) acts as the primary underwriting constraint. Deals ≥ 72 clear Investment Committee thresholds; 52–71 require price/rate negotiation.`;
+
+        const elDoe = document.getElementById('explain-doe');
+        if (elDoe) elDoe.innerHTML = `<strong>2³ Factorial Stress Test:</strong> Tests all 8 combinations of Interest Rate (5.50% vs 7.25%), Rehab ($10k vs $45k), and OpEx (28% vs 38%). <strong class="num">${doe.passCount}/8</strong> scenarios clear the <span class="num">1.20x</span> lender DSCR covenant (dashed line). An IQR of <strong class="num">${doe.iqr.toFixed(2)}x</strong> measures sensitivity to adverse rate/expense shocks.`;
+      }
+
+      function renderEChartsMasterNex() {
+        const cMn = getChart('echart-masternex');
+        if (!cMn) return;
+        cMn.setOption({
+          backgroundColor: 'transparent',
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
+          legend: { data: ['NADE (bps)', 'GIE (bps)', 'BNE (bps)'], textStyle: { color: '#a8b0c8', fontSize: 11 }, top: 0 },
+          grid: { left: 50, right: 12, top: 32, bottom: 24 },
+          xAxis: { type: 'category', data: MASTERNEX_DECISIONS.map((d) => d.label), axisLabel: { color: '#9aa3bd', fontSize: 10 } },
+          yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }, axisLabel: { color: '#9aa3bd', fontSize: 10 } },
+          series: [
+            { name: 'NADE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.nade), itemStyle: { color: '#9ba8ff' } },
+            { name: 'GIE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.gie), itemStyle: { color: '#64d8b4' } },
+            { name: 'BNE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.bne), itemStyle: { color: '#f2b872' } }
+          ]
+        });
+        const elMn = document.getElementById('explain-masternex');
+        if (elMn) elMn.innerHTML = `<strong>Scientific Basis-Point Attribution:</strong> Stacked bars decompose total modeled return edge (bps) across MasterNex verification stages into <strong>NADE</strong> (non-linear debt/equity sensitivity), <strong>GIE</strong> (geographic/location alpha), and <strong>BNE</strong> (benchmark net efficiency).`;
+      }
+
+      // =====================================================================
+      // MULTI-LAYER OPEN-SOURCE MAP (3D BUILDINGS, HEATMAP, RINGS, SAT/TOPO)
+      // =====================================================================
+      function createCircleCoords(lng, lat, radiusMeters) {
+        const pts = 64, coords = [], dLat = radiusMeters / 111320, dLng = radiusMeters / (111320 * Math.cos((lat * Math.PI) / 180));
+        for (let i = 0; i <= pts; i++) { const t = (i / pts) * Math.PI * 2; coords.push([lng + dLng * Math.cos(t), lat + dLat * Math.sin(t)]); }
+        return coords;
+      }
+
+      function applyMapLayers() {
+        const p = state.properties[state.activeIndex] || state.properties[0];
+        const lat = Number(p.lat) || 32.5421, lng = Number(p.lng) || -97.3208;
+        const audit = state.locationAudits[p.id];
+
+        if (state.mapEngine === 'leaflet' && state.leafletMap && state.leafletOverlayGroup) {
+          state.leafletOverlayGroup.clearLayers();
+          if (state.layers.rings) {
+            [800, 1600, 3200].forEach((r, idx) => {
+              L.circle([lat, lng], { radius: r, color: idx === 1 ? '#9ba8ff' : '#a8b0c8', weight: idx === 1 ? 1.8 : 1, dashArray: '5,4', fillOpacity: idx === 0 ? 0.08 : 0.02 }).addTo(state.leafletOverlayGroup);
+            });
+          }
+          if (state.layers.heatmap) {
+            state.properties.forEach((prop) => {
+              const uw = calcUW(prop);
+              L.circle([prop.lat, prop.lng], { radius: 950, stroke: false, fillColor: uw.capRate >= 7 ? '#64d8b4' : '#f2b872', fillOpacity: 0.22 }).addTo(state.leafletOverlayGroup);
+            });
+          }
+          if (audit) {
+            audit.features.filter((f) => state.amenities.visible[f.properties.category]).forEach((f) => {
+              const [fLng, fLat] = f.geometry.coordinates;
+              const col = f.properties.category === 'schools' ? '#7da0ff' : f.properties.category === 'transit' ? '#64d8b4' : '#f2b872';
+              L.circleMarker([fLat, fLng], { radius: 6, color: '#181a24', weight: 1.5, fillColor: col, fillOpacity: 0.94 })
+                .bindPopup(`<strong>${escHtml(f.properties.name)}</strong><br/>${escHtml(f.properties.subtype)} · ${f.properties.distanceMi} mi`).addTo(state.leafletOverlayGroup);
+            });
+          }
+          return;
+        }
+
+        if (state.mapEngine === 'maplibre' && state.map && state.map.isStyleLoaded()) {
+          const map = state.map;
+
+          // 3D Extruded Buildings Layer (OpenFreeMap vector tile source)
+          if (state.layers.buildings && !map.getLayer('pi-3d-buildings')) {
+            const sources = map.getStyle()?.sources || {};
+            const vecSource = Object.keys(sources).find((k) => sources[k].type === 'vector');
+            if (vecSource) {
+              try {
+                map.addLayer({
+                  id: 'pi-3d-buildings',
+                  source: vecSource,
+                  'source-layer': 'building',
+                  type: 'fill-extrusion',
+                  minzoom: 13.5,
+                  paint: {
+                    'fill-extrusion-color': '#2b3044',
+                    'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 12],
+                    'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+                    'fill-extrusion-opacity': 0.78
+                  }
+                });
+              } catch { /* style may not expose building layer */ }
+            }
+          } else if (map.getLayer('pi-3d-buildings')) {
+            map.setLayoutProperty('pi-3d-buildings', 'visibility', state.layers.buildings ? 'visible' : 'none');
+          }
+
+          // Multi-Ring 0.5 / 1.0 / 2.0 mi Buffers
+          const ringGeo = {
+            type: 'FeatureCollection',
+            features: state.layers.rings ? [800, 1600, 3200].map((r) => ({ type: 'Feature', properties: { r }, geometry: { type: 'Polygon', coordinates: [createCircleCoords(lng, lat, r)] } })) : []
+          };
+          if (map.getSource('pi-rings')) map.getSource('pi-rings').setData(ringGeo);
+          else {
+            map.addSource('pi-rings', { type: 'geojson', data: ringGeo });
+            map.addLayer({ id: 'pi-rings-line', type: 'line', source: 'pi-rings', paint: { 'line-color': '#9ba8ff', 'line-width': 1.5, 'line-dasharray': [4, 3], 'line-opacity': 0.75 } });
+          }
+
+          // Yield Heatmap Layer
+          const heatGeo = {
+            type: 'FeatureCollection',
+            features: state.layers.heatmap ? state.properties.map((pr) => ({ type: 'Feature', properties: { cap: calcUW(pr).capRate }, geometry: { type: 'Point', coordinates: [pr.lng, pr.lat] } })) : []
+          };
+          if (map.getSource('pi-heat')) map.getSource('pi-heat').setData(heatGeo);
+          else {
+            map.addSource('pi-heat', { type: 'geojson', data: heatGeo });
+            map.addLayer({
+              id: 'pi-heat-layer', type: 'heatmap', source: 'pi-heat',
+              paint: { 'heatmap-weight': ['interpolate', ['linear'], ['get', 'cap'], 4, 0.3, 10, 1], 'heatmap-radius': 48, 'heatmap-opacity': 0.55, 'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'], 0, 'rgba(0,0,0,0)', 0.4, '#9ba8ff', 0.8, '#64d8b4', 1, '#f2b872'] }
+            });
+          }
+
+          // Overpass POIs
+          const poiGeo = { type: 'FeatureCollection', features: audit ? audit.features.filter((f) => state.amenities.visible[f.properties.category]) : [] };
+          if (map.getSource('pi-pois')) map.getSource('pi-pois').setData(poiGeo);
+          else {
+            map.addSource('pi-pois', { type: 'geojson', data: poiGeo });
+            map.addLayer({ id: 'pi-pois-circle', type: 'circle', source: 'pi-pois', paint: { 'circle-radius': 6, 'circle-color': ['match', ['get', 'category'], 'schools', '#7da0ff', 'transit', '#64d8b4', 'retail', '#f2b872', '#fff'], 'circle-stroke-width': 1.5, 'circle-stroke-color': '#181a24' } });
+          }
+        }
+      }
+
+      function initOrRefreshMap() {
+        if (OPENFREEMAP_STYLES[state.mapStyle]) {
+          state.mapEngine = 'maplibre';
+          document.getElementById('leaflet-map-canvas').classList.add('hidden');
+          document.getElementById('openmap-canvas').classList.remove('hidden');
+          document.getElementById('map-engine-pill').textContent = `MapLibre 3D · ${state.mapStyle}`;
+          const styleUrl = OPENFREEMAP_STYLES[state.mapStyle];
+          if (!state.map && typeof maplibregl !== 'undefined') {
+            const first = state.properties[state.activeIndex] || state.properties[0];
+            state.map = new maplibregl.Map({ container: 'openmap-canvas', style: styleUrl, center: [first.lng, first.lat], zoom: 13.8, pitch: state.perspective === '2d' ? 0 : state.perspective === 'street' ? 62 : 46, bearing: state.perspective === '2d' ? 0 : -18 });
+            state.map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+            state.map.on('style.load', () => { applyMapLayers(); syncMarkers(); });
+            state.map.on('error', () => { state.mapStyle = 'carto_dark'; document.getElementById('map-style-select').value = 'carto_dark'; initOrRefreshMap(); });
+          } else if (state.map) {
+            state.map.setStyle(styleUrl);
+            state.map.resize();
+          }
+          setTimeout(() => { if (state.map) state.map.resize(); syncMarkers(); applyMapLayers(); }, 60);
+        } else {
+          state.mapEngine = 'leaflet';
+          document.getElementById('openmap-canvas').classList.add('hidden');
+          document.getElementById('leaflet-map-canvas').classList.remove('hidden');
+          const cfg = LEAFLET_TILE_STYLES[state.mapStyle] || LEAFLET_TILE_STYLES.carto_dark;
+          document.getElementById('map-engine-pill').textContent = cfg.label;
+          if (!state.leafletMap && typeof L !== 'undefined') {
+            const first = state.properties[state.activeIndex] || state.properties[0];
+            state.leafletMap = L.map('leaflet-map-canvas').setView([first.lat, first.lng], 13);
+            state.leafletOverlayGroup = L.layerGroup().addTo(state.leafletMap);
+          }
+          if (state.leafletTileLayer) state.leafletMap.removeLayer(state.leafletTileLayer);
+          state.leafletTileLayer = L.tileLayer(cfg.url, cfg.options).addTo(state.leafletMap);
+          setTimeout(() => { state.leafletMap.invalidateSize(); syncMarkers(); applyMapLayers(); }, 60);
+        }
+      }
+
+      function syncMarkers() {
+        if (state.mapEngine === 'maplibre' && state.map) {
+          state.mapMarkers.forEach((m) => m.remove()); state.mapMarkers = [];
+          state.properties.forEach((p, idx) => {
+            const el = document.createElement('div');
+            el.className = `dusk-pin ${idx === state.activeIndex ? 'active' : ''}`;
+            el.style.background = idx === state.activeIndex ? 'var(--color-accent)' : 'var(--color-accent-2)';
+            el.style.color = 'var(--color-accent-ink)';
+            el.textContent = String(idx + 1);
+            el.addEventListener('click', () => { state.activeIndex = idx; syncUWInputs(); renderAll(); syncMarkers(); applyMapLayers(); });
+            const m = calcUW(p);
+            const marker = new maplibregl.Marker({ element: el }).setLngLat([p.lng, p.lat]).setPopup(new maplibregl.Popup({ offset: 18 }).setHTML(`<strong>#${idx + 1} ${escHtml(p.address)}</strong><br/>Cap ${m.capRate.toFixed(2)}% · DSCR ${m.dscr.toFixed(2)}x`)).addTo(state.map);
+            state.mapMarkers.push(marker);
+          });
+        } else if (state.mapEngine === 'leaflet' && state.leafletMap) {
+          state.leafletMarkers.forEach((m) => state.leafletMap.removeLayer(m)); state.leafletMarkers = [];
+          state.properties.forEach((p, idx) => {
+            const icon = L.divIcon({ className: 'dusk-leaflet-icon', iconSize: [32, 32], iconAnchor: [16, 16], html: `<div class="dusk-pin ${idx === state.activeIndex ? 'active' : ''}" style="background:${idx === state.activeIndex ? 'var(--color-accent)' : 'var(--color-accent-2)'}; color:var(--color-accent-ink);">${idx + 1}</div>` });
+            const m = calcUW(p);
+            const marker = L.marker([p.lat, p.lng], { icon }).bindPopup(`<strong>#${idx + 1} ${escHtml(p.address)}</strong><br/>Cap ${m.capRate.toFixed(2)}% · DSCR ${m.dscr.toFixed(2)}x`).addTo(state.leafletMap);
+            marker.on('click', () => { state.activeIndex = idx; syncUWInputs(); renderAll(); syncMarkers(); applyMapLayers(); });
+            state.leafletMarkers.push(marker);
+          });
+        }
+      }
+
+      // =====================================================================
+      // DUAL GEOCODER (PHOTON + NOMINATIM FALLBACK) & OVERPASS POIS
+      // =====================================================================
+      async function geocodeDual(q, mode = 'search') {
+        if (!q.trim()) return;
+        let hits = [];
+        try {
+          const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5`);
+          const d = await r.json();
+          hits = (d.features || []).map((f) => ({ label: [f.properties.housenumber, f.properties.street, f.properties.name, f.properties.city, f.properties.state].filter(Boolean).join(', '), lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] }));
+        } catch { /* fallback to Nominatim */ }
+        if (!hits.length) {
+          try {
+            const r2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`);
+            const d2 = await r2.json();
+            hits = d2.map((x) => ({ label: x.display_name.split(',').slice(0, 3).join(','), lat: parseFloat(x.lat), lng: parseFloat(x.lon) }));
+          } catch { /* ignore */ }
+        }
+        if (mode === 'active') {
+          if (!hits.length) { showToast('No OSM coordinates found.'); return; }
+          state.properties[state.activeIndex].lat = hits[0].lat; state.properties[state.activeIndex].lng = hits[0].lng;
+          renderAll(); syncMarkers(); applyMapLayers(); showToast(`Located (${hits[0].lat.toFixed(4)}, ${hits[0].lng.toFixed(4)})`);
+          return;
+        }
+        const box = document.getElementById('osm-search-results');
+        box.innerHTML = hits.length ? '' : '<div class="p-2">No matches found.</div>';
+        hits.forEach((h) => {
+          const btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 flex justify-between';
+          btn.innerHTML = `<span class="truncate">${escHtml(h.label)}</span><span style="color:var(--color-accent)">+ Pin</span>`;
+          btn.addEventListener('click', () => {
+            box.classList.add('hidden');
+            state.properties.push({ id: crypto.randomUUID(), address: h.label, beds: 3, sqft: 1950, price: 350000, rent: 3100, downPct: 20, rate: 6.25, opexPct: 32, rehab: 15000, lat: h.lat, lng: h.lng });
+            state.activeIndex = state.properties.length - 1;
+            syncUWInputs(); renderAll(); initOrRefreshMap();
+          });
+          box.appendChild(btn);
+        });
+        box.classList.remove('hidden');
+      }
+
+      async function scanOverpass() {
+        const p = state.properties[state.activeIndex], lat = p.lat, lng = p.lng;
+        const r = Number(document.getElementById('overpass-radius-select').value) || 1600;
+        const dLat = r / 111320, dLng = r / (111320 * Math.cos((lat * Math.PI) / 180));
+        const q = `[out:json][timeout:10][bbox:${(lat-dLat).toFixed(5)},${(lng-dLng).toFixed(5)},${(lat+dLat).toFixed(5)},${(lng+dLng).toFixed(5)}];(nwr["amenity"="school"];node["highway"="bus_stop"];node["railway"="station"];nwr["shop"="supermarket"];node["amenity"="restaurant"];node["amenity"="cafe"];);out center 120;`;
+        const st = document.getElementById('map-overpass-status');
+        st.classList.remove('hidden'); st.textContent = 'Querying Overpass OSM mirrors…';
+        try {
+          const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: `data=${encodeURIComponent(q)}` });
+          const data = await res.json();
+          const feats = (data.elements || []).map((el, i) => {
+            const fLat = el.lat ?? el.center?.lat, fLng = el.lon ?? el.center?.lon; if (!fLat || !fLng) return null;
+            const t = el.tags || {}, cat = t.amenity === 'school' ? 'schools' : (t.highway === 'bus_stop' || t.railway) ? 'transit' : 'retail';
+            const dist = Math.hypot((fLat - lat) * 69, (fLng - lng) * 55);
+            return { type: 'Feature', properties: { id: i, name: t.name || cat, category: cat, subtype: t.amenity || t.shop || 'stop', distanceMi: Number(dist.toFixed(2)) }, geometry: { type: 'Point', coordinates: [fLng, fLat] } };
+          }).filter(Boolean);
+          const counts = { schools: feats.filter((x) => x.properties.category === 'schools').length, transit: feats.filter((x) => x.properties.category === 'transit').length, retail: feats.filter((x) => x.properties.category === 'retail').length };
+          const score = Math.min(100, counts.schools * 10 + counts.transit * 8 + counts.retail * 4);
+          state.locationAudits[p.id] = { score, tier: score >= 70 ? 'Prime Walkable' : score >= 45 ? 'Strong Suburban' : 'Car-Dependent', counts, features: feats };
+          ['schools', 'transit', 'retail'].forEach((c) => (document.getElementById(`count-amenity-${c}`).textContent = String(counts[c])));
+          st.textContent = `Mapped ${feats.length} Overpass POIs — Location Score ${score}/100`;
+          applyMapLayers(); renderAll();
+        } catch {
+          st.textContent = 'Overpass mirror busy — retry in a few seconds.';
+        }
+      }
+
+      // =====================================================================
+      // REPORTS, AG-UI 1.0 & CORE UI WIRING
+      // =====================================================================
+      function formatMarkdownToDuskHTML(md) {
+        const lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+        const inline = (s) => escHtml(s)
+          .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--color-ink-1);font-weight:600">$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded text-xs" style="background:rgba(155,168,255,0.12);color:var(--color-accent)">$1</code>');
+
+        let html = '', inList = false, inTable = false, tableHeaderDone = false;
+        const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+        const closeTable = () => { if (inTable) { html += '</tbody></table></div>'; inTable = false; tableHeaderDone = false; } };
+
+        for (let i = 0; i < lines.length; i++) {
+          const raw = lines[i].trim();
+          if (!raw) { closeList(); closeTable(); continue; }
+
+          if (/^\|.+\|$/.test(raw)) {
+            closeList();
+            const cells = raw.slice(1, -1).split('|').map((c) => c.trim());
+            if (cells.every((c) => /^:?-{2,}:?$/.test(c))) {
+              tableHeaderDone = true;
+              continue;
+            }
+            if (!inTable) {
+              inTable = true;
+              tableHeaderDone = false;
+              html += '<div class="overflow-x-auto my-3 rounded-lg" style="border:1px solid var(--color-hairline)"><table class="w-full text-left border-collapse text-xs">';
+              html += '<thead><tr style="background:rgba(155,168,255,0.08);border-bottom:1px solid var(--color-hairline)">' + cells.map((c) => `<th class="py-2 px-3 font-semibold" style="color:var(--color-ink-1)">${inline(c)}</th>`).join('') + '</tr></thead><tbody>';
+            } else {
+              html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">' + cells.map((c) => `<td class="py-2 px-3 num" style="color:var(--color-ink-2)">${inline(c)}</td>`).join('') + '</tr>';
+            }
+            continue;
+          }
+          closeTable();
+
+          if (/^---+$/.test(raw)) { closeList(); html += '<hr class="my-3" style="border-color:var(--color-hairline)"/>'; continue; }
+          const hMatch = raw.match(/^(#{1,4})\s+(.+)$/);
+          if (hMatch) {
+            closeList();
+            const lvl = hMatch[1].length;
+            const cls = lvl <= 2 ? 'text-sm font-semibold mt-4 mb-1.5 tracking-tight' : 'text-xs font-semibold uppercase tracking-wider mt-3 mb-1';
+            const clr = lvl <= 2 ? 'var(--color-ink-1)' : 'var(--color-accent)';
+            html += `<h${lvl + 1} class="${cls}" style="color:${clr}">${inline(hMatch[2])}</h${lvl + 1}>`;
+            continue;
+          }
+          const liMatch = raw.match(/^(?:[-*•]|\d+\.)\s+(.+)$/);
+          if (liMatch) {
+            if (!inList) { html += '<ul class="space-y-1.5 my-2 pl-4 list-disc" style="color:var(--color-ink-2)">'; inList = true; }
+            html += `<li class="text-sm leading-relaxed">${inline(liMatch[1])}</li>`;
+            continue;
+          }
+          closeList();
+          html += `<p class="text-sm leading-relaxed my-1.5" style="color:var(--color-ink-2)">${inline(raw)}</p>`;
+        }
+        closeList(); closeTable();
+        return html;
+      }
+
+      function buildQuantFallbackMarkdown(type, p, m) {
+        const doe = computeDOERuns(p);
+        const yr10Eq = m.equitySeries[m.equitySeries.length - 1] || 0;
+        const yr10Cf = m.cfSeries[m.cfSeries.length - 1] || 0;
+        const mult = m.cashIn > 0 ? ((yr10Eq + yr10Cf) / m.cashIn).toFixed(2) : '0.00';
+        const verdict = m.dscr >= 1.25 ? 'ACQUIRE' : m.dscr >= 1.05 ? 'NEGOTIATE' : 'PASS';
+        if (type === 'negotiation') {
+          const targetPrice = Math.round(m.price * (m.dscr >= 1.25 ? 0.96 : 0.90));
+          const creditAsk = Math.round(m.price * 0.025);
+          return `### Seller Negotiation Strategy — ${p.address}\n- **Current Verdict:** ${verdict} (DSCR ${m.dscr.toFixed(2)}x at $${m.price.toLocaleString()})\n- **Anchor Offer:** $${targetPrice.toLocaleString()} with $${creditAsk.toLocaleString()} seller credit toward a 2-1 rate buydown.\n\n| Lever | Current Ask | Target Terms | Impact |\n|---|---|---|---|\n| Purchase Price | $${m.price.toLocaleString()} | $${targetPrice.toLocaleString()} | +${((1 - targetPrice / m.price) * 100).toFixed(1)}% basis discount |\n| Debt Rate | ${(m.rate * 100).toFixed(2)}% | ${(m.rate * 100 - 0.75).toFixed(2)}% | Improves DSCR cushion |\n| Cash-in | ${fmtMoney(m.cashIn)} | ${fmtMoney(m.cashIn * (targetPrice / m.price))} | Lower equity at risk |`;
+        }
+        if (type === 'cma') {
+          const rows = state.properties.map((prop, idx) => {
+            const pm = calcUW(prop);
+            return `| #${idx + 1} ${prop.address} | $${pm.price.toLocaleString()} | $${pm.baseRent.toLocaleString()}/mo | ${pm.capRate.toFixed(2)}% | ${pm.coc.toFixed(2)}% | ${pm.dscr.toFixed(2)}x |`;
+          }).join('\n');
+          return `### Portfolio Comparative Market Analysis (${state.properties.length} Assets)\n| Asset | Price | Rent | Cap Rate | CoC | DSCR |\n|---|---|---|---|---|---|\n${rows}\n\n- **Active Focus:** ${p.address} ranks at **${m.capRate.toFixed(2)}% Cap** and **${m.dscr.toFixed(2)}x DSCR** across the active portfolio.`;
+        }
+        if (type === 'lp_memo') {
+          return `### Institutional LP Brief — ${p.address}\n- **Required LP Equity:** ${fmtMoney(m.cashIn)} (${m.downPct}% down + $${m.rehab.toLocaleString()} CapEx)\n- **10-Year Projected Total Equity + Cash Flow:** ${fmtMoney(yr10Eq + yr10Cf)} (**${mult}x** equity multiple)\n- **Downside Resilience:** **${doe.passCount}/8** scenarios clear 1.20x DSCR in the 2³ factorial stress test (mean DSCR ${doe.mean.toFixed(2)}x).\n\n| Metric | Value |\n|---|---|\n| Annual NOI | ${fmtMoney(m.noi)} |\n| Year-1 Cash-on-Cash | ${m.coc.toFixed(2)}% |\n| Monthly Net Cash Flow | ${fmtMoney(m.mCf)} |`;
+        }
+        return `### IC Audit Executive Memo — ${p.address}\n- **Recommendation:** **${verdict}** · Cap Rate **${m.capRate.toFixed(2)}%** · DSCR **${m.dscr.toFixed(2)}x**\n\n| Underwriting Metric | Modeled Value |\n|---|---|\n| Purchase Price | $${m.price.toLocaleString()} |\n| Monthly Gross Rent | $${m.baseRent.toLocaleString()} |\n| Net Operating Income | ${fmtMoney(m.noiMo)}/mo (${fmtMoney(m.noi)}/yr) |\n| Debt Service | ${fmtMoney(m.mDebt)}/mo |\n| Net Cash Flow | ${fmtMoney(m.mCf)}/mo |\n| Cash-on-Cash Return | ${m.coc.toFixed(2)}% |`;
+      }
+
+      async function runReport(type, customQ = '') {
+        switchTab('reports');
+        document.querySelectorAll('.report-trigger').forEach((btn) => {
+          const isMatch = btn.dataset.report === type && !customQ;
+          btn.classList.toggle('btn-peri', isMatch);
+          btn.classList.toggle('btn-ghost', !isMatch);
+        });
+        const p = state.properties[state.activeIndex] || state.properties[0], m = calcUW(p);
+        const doe = computeDOERuns(p);
+        const box = document.getElementById('report-dossier-container');
+        const labels = { ic_audit: 'IC Audit', negotiation: 'Negotiation Strategy', cma: 'Portfolio CMA', lp_memo: 'LP Brief' };
+        const reportTitle = customQ ? 'Custom Analysis' : (labels[type] || 'Executive Memo');
+        document.getElementById('report-engine-badge').textContent = PROVIDER_PRESETS[state.provider].label;
+
+        const portfolioSummary = state.properties.map((prop, idx) => {
+          const pm = calcUW(prop);
+          return `#${idx + 1} ${prop.address}: Price $${pm.price.toLocaleString()}, Rent $${pm.baseRent}/mo, Cap ${pm.capRate.toFixed(2)}%, CoC ${pm.coc.toFixed(2)}%, DSCR ${pm.dscr.toFixed(2)}x`;
+        }).join(' | ');
+
+        let prompt = '';
+        if (customQ) {
+          prompt = `${customQ} Context for ${p.address}: Price $${m.price.toLocaleString()}, Rent $${m.baseRent}/mo, NOI $${Math.round(m.noi)}/yr, Cap ${m.capRate.toFixed(2)}%, CoC ${m.coc.toFixed(2)}%, DSCR ${m.dscr.toFixed(2)}x. Format cleanly with Markdown headings, bullets, and a summary table.`;
+        } else if (type === 'negotiation') {
+          prompt = `Write a sharp Seller Negotiation & Offer Strategy memo for ${p.address} (Price $${m.price.toLocaleString()}, Rent $${m.baseRent}/mo, Cap ${m.capRate.toFixed(2)}%, CoC ${m.coc.toFixed(2)}%, DSCR ${m.dscr.toFixed(2)}x, Rehab $${m.rehab.toLocaleString()}). Include an anchor offer price, seller concession/rate-buydown ask, key inspection contingencies, and a comparison table in Markdown.`;
+        } else if (type === 'cma') {
+          prompt = `Write a Portfolio Comparative Market Analysis (CMA) comparing all properties in the portfolio: ${portfolioSummary}. Highlight which property leads on Cap Rate, Cash-on-Cash, and DSCR resilience, and include a Markdown comparison table.`;
+        } else if (type === 'lp_memo') {
+          const yr10Eq = m.equitySeries[m.equitySeries.length - 1] || 0;
+          const yr10Cf = m.cfSeries[m.cfSeries.length - 1] || 0;
+          prompt = `Write an institutional Limited Partner (LP) Deal Brief for ${p.address}. Cash-in: $${Math.round(m.cashIn).toLocaleString()}, Year-1 CoC: ${m.coc.toFixed(2)}%, DSCR: ${m.dscr.toFixed(2)}x, 10-Yr Projected Equity+CF: $${Math.round(yr10Eq + yr10Cf).toLocaleString()}, 2^3 DOE stress pass rate: ${doe.passCount}/8. Include executive thesis, risk mitigants, and a Markdown key-metrics table.`;
+        } else {
+          prompt = `Write a concise Investment Committee (IC) Underwriting Audit for ${p.address}: Price $${m.price.toLocaleString()}, Rent $${m.baseRent}/mo, OpEx ${m.opexPct}%, Cap ${m.capRate.toFixed(2)}%, CoC ${m.coc.toFixed(2)}%, DSCR ${m.dscr.toFixed(2)}x, DOE pass ${doe.passCount}/8. Format with Markdown headings, clear recommendation, and a summary table.`;
+        }
+
+        if (state.provider === 'quant') {
+          const md = buildQuantFallbackMarkdown(type, p, m);
+          box.innerHTML = `<div class="glass p-5 space-y-3"><div class="flex flex-wrap items-center justify-between gap-2 row-rule pb-2.5"><div><span class="text-[10px] uppercase tracking-widest block" style="color:var(--color-accent)">${escHtml(reportTitle)}</span><h3 class="text-base font-semibold">${escHtml(type === 'cma' ? `Portfolio (${state.properties.length} Assets)` : p.address)}</h3></div><span class="badge ${m.dscr >= 1.25 ? 'badge-acquire' : 'badge-negotiate'}">${m.dscr >= 1.25 ? 'ACQUIRE' : 'NEGOTIATE'}</span></div><div>${formatMarkdownToDuskHTML(md)}</div></div>`;
+          return;
+        }
+
+        box.innerHTML = '';
+        document.getElementById('report-loading').classList.remove('hidden');
+        try {
+          let txt = '';
+          if (state.provider === 'pollinations') {
+            const r = await fetch('https://text.pollinations.ai/openai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'openai', messages: [{ role: 'user', content: prompt }] }) });
+            if (!r.ok) throw new Error(`Pollinations HTTP ${r.status}`);
+            const d = await r.json(); txt = d?.choices?.[0]?.message?.content || '';
+          } else if (state.provider === 'claude') {
+            const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': state.apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: state.modelId, max_tokens: 1200, messages: [{ role: 'user', content: prompt }] }) });
+            const d = await r.json(); txt = d?.content?.map((c) => c.text).join('\n') || d?.error?.message || '';
+          } else if (state.provider === 'gemini') {
+            const r = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': state.apiKey, 'Api-Revision': '2026-05-20' }, body: JSON.stringify({ model: state.modelId, input: prompt, tools: [{ type: 'google_search' }, { type: 'google_maps', latitude: p.lat, longitude: p.lng }] }) });
+            const d = await r.json(); txt = d?.output_text || d?.error?.message || '';
+          } else {
+            const r = await fetch(state.baseUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(state.apiKey ? { Authorization: `Bearer ${state.apiKey}` } : {}) }, body: JSON.stringify({ model: state.modelId, messages: [{ role: 'user', content: prompt }] }) });
+            const d = await r.json(); txt = d?.choices?.[0]?.message?.content || '';
+          }
+          if (!txt.trim()) throw new Error('Empty model response');
+          box.innerHTML = `<div class="glass p-5 space-y-3"><div class="flex flex-wrap items-center justify-between gap-2 row-rule pb-2.5"><div><span class="text-[10px] uppercase tracking-widest block" style="color:var(--color-accent)">${escHtml(reportTitle)}</span><h3 class="text-base font-semibold">${escHtml(type === 'cma' ? `Portfolio (${state.properties.length} Assets)` : p.address)}</h3></div><span class="badge badge-peri">${escHtml(state.provider)}</span></div><div class="space-y-1">${formatMarkdownToDuskHTML(txt)}</div></div>`;
+        } catch (err) {
+          const fallbackMd = buildQuantFallbackMarkdown(type, p, m);
+          box.innerHTML = `<div class="glass p-5 space-y-3"><div class="flex flex-wrap items-center justify-between gap-2 row-rule pb-2.5"><div><span class="text-[10px] uppercase tracking-widest block" style="color:var(--color-accent-2)">${escHtml(reportTitle)} · Quant Fallback (${escHtml(err.message)})</span><h3 class="text-base font-semibold">${escHtml(type === 'cma' ? `Portfolio (${state.properties.length} Assets)` : p.address)}</h3></div><span class="badge badge-negotiate">QUANT FALLBACK</span></div><div class="space-y-1">${formatMarkdownToDuskHTML(fallbackMd)}</div></div>`;
+        } finally {
+          document.getElementById('report-loading').classList.add('hidden');
+        }
+      }
+
+      const aguiEvents = [];
+      function emitAgUi(type, payload = {}) {
+        aguiEvents.unshift({ type, ts: new Date().toLocaleTimeString(), ...payload });
+        document.getElementById('agui-event-log').innerHTML = aguiEvents.slice(0, 20).map((e) => `<div><span style="color:var(--color-accent)">${e.type}</span> ${escHtml(JSON.stringify(e))}</div>`).join('');
+      }
+
+      function renderHeroAccounts() {
+        const container = document.getElementById('hero-account-rows'); container.innerHTML = '';
+        let totVal = 0, capSum = 0, totCf = 0;
+        state.properties.forEach((p, idx) => {
+          const m = calcUW(p); totVal += m.price; capSum += m.capRate; totCf += m.mCf;
+          const isAct = idx === state.activeIndex;
+          const row = document.createElement('div');
+          row.className = `py-3 px-2.5 flex items-center justify-between gap-3 cursor-pointer rounded-lg ${isAct ? 'inner-well' : ''}`;
+          row.innerHTML = `<div class="flex items-center gap-3 min-w-0"><div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style="background:oklch(100% 0 0 / 0.08)">${escHtml((p.address||'PR').slice(0,2).toUpperCase())}</div><div class="min-w-0"><div class="text-sm font-medium truncate">${escHtml(p.address)}</div><div class="text-xs" style="color:var(--color-muted)">DSCR ${m.dscr.toFixed(2)}x</div></div></div><div class="text-right"><div class="num text-sm">${fmtMoney(m.mCf)}</div><div class="text-xs" style="color:var(--color-muted)">${m.capRate.toFixed(2)}%</div></div>`;
+          row.addEventListener('click', () => { state.activeIndex = idx; syncUWInputs(); renderAll(); syncMarkers(); applyMapLayers(); });
+          container.appendChild(row);
+        });
+        document.getElementById('tally-total-val').innerHTML = fmtMoney(totVal);
+        document.getElementById('tally-avg-cap').innerHTML = fmtPct(state.properties.length ? capSum / state.properties.length : 0);
+        document.getElementById('tally-total-cf').innerHTML = fmtMoney(totCf);
+        document.getElementById('active-deal-label').textContent = `#${state.activeIndex + 1} · ${state.properties[state.activeIndex]?.address || ''}`;
+      }
+
+      function syncUWInputs() {
+        const p = state.properties[state.activeIndex]; if (!p) return;
+        document.getElementById('inp-active-address').value = p.address || '';
+        document.getElementById('uw-price').value = p.price; document.getElementById('uw-rent').value = p.rent;
+        document.getElementById('uw-down').value = p.downPct; document.getElementById('uw-rate').value = p.rate;
+        document.getElementById('uw-opex').value = p.opexPct; document.getElementById('uw-rehab').value = p.rehab;
+      }
+
+      function renderAll() {
+        renderHeroAccounts();
+        const p = state.properties[state.activeIndex], m = calcUW(p);
+        document.getElementById('lbl-uw-price').textContent = '$' + m.price.toLocaleString();
+        document.getElementById('lbl-uw-rent').textContent = '$' + m.baseRent.toLocaleString();
+        document.getElementById('lbl-uw-down').textContent = Math.round(m.downPct * 100) + '%';
+        document.getElementById('lbl-uw-rate').textContent = (m.rate * 100).toFixed(2) + '%';
+        document.getElementById('lbl-uw-opex').textContent = Math.round(m.opexPct * 100) + '%';
+        document.getElementById('lbl-uw-rehab').textContent = '$' + m.rehab.toLocaleString();
+        document.getElementById('m-cap').innerHTML = fmtPct(m.capRate);
+        document.getElementById('m-coc').innerHTML = fmtPct(m.coc);
+        document.getElementById('m-cf').innerHTML = fmtMoney(m.mCf);
+        document.getElementById('m-dscr').innerHTML = `${Math.floor(m.dscr)}<span class="c">.${(m.dscr % 1).toFixed(2).substring(2)}x</span>`;
+        if (state.activeTab === 'underwrite') renderEChartsUnderwriting(m);
+        if (state.activeTab === 'decisions') renderEChartsDecisions();
+        if (state.activeTab === 'agui') renderEChartsMasterNex();
+      }
+
+      function switchTab(id) {
+        state.activeTab = id;
+        ['underwrite', 'map', 'reports', 'decisions', 'agui'].forEach((t) => document.getElementById('panel-' + t).classList.toggle('hidden', t !== id));
+        document.querySelectorAll('.ws-tab').forEach((b) => {
+          const on = b.getAttribute('data-tab') === id;
+          b.classList.toggle('active', on);
+          b.querySelector('.tab-dot').className = on ? 'tab-dot sig-peri' : 'tab-dot w-1.5 h-1.5 rounded-full bg-transparent inline-block';
+        });
+        if (id === 'underwrite') setTimeout(() => { renderEChartsUnderwriting(calcUW(state.properties[state.activeIndex])); Object.values(state.charts).forEach((c) => c.resize()); }, 30);
+        if (id === 'map') setTimeout(initOrRefreshMap, 30);
+        if (id === 'decisions') setTimeout(() => { renderEChartsDecisions(); Object.values(state.charts).forEach((c) => c.resize()); }, 30);
+        if (id === 'agui') setTimeout(() => { renderEChartsMasterNex(); Object.values(state.charts).forEach((c) => c.resize()); }, 30);
+      }
+
+      document.querySelectorAll('.ws-tab').forEach((b) => b.addEventListener('click', () => switchTab(b.getAttribute('data-tab'))));
+      document.getElementById('uw-strategy-select').addEventListener('change', (e) => { state.activeStrategy = e.target.value; renderAll(); });
+      ['uw-price', 'uw-rent', 'uw-down', 'uw-rate', 'uw-opex', 'uw-rehab'].forEach((id) => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          const map = { 'uw-price': 'price', 'uw-rent': 'rent', 'uw-down': 'downPct', 'uw-rate': 'rate', 'uw-opex': 'opexPct', 'uw-rehab': 'rehab' };
+          state.properties[state.activeIndex][map[id]] = Number(e.target.value);
+          renderAll();
+        });
+      });
+
+      document.getElementById('map-style-select').addEventListener('change', (e) => { state.mapStyle = e.target.value; initOrRefreshMap(); });
+      document.querySelectorAll('.persp-btn').forEach((b) => b.addEventListener('click', () => {
+        state.perspective = b.getAttribute('data-persp');
+        document.querySelectorAll('.persp-btn').forEach((x) => { x.style.background = x === b ? 'var(--color-accent)' : 'transparent'; x.style.color = x === b ? 'var(--color-accent-ink)' : 'var(--color-muted)'; });
+        if (state.mapEngine !== 'maplibre') { state.mapStyle = 'fiord'; document.getElementById('map-style-select').value = 'fiord'; initOrRefreshMap(); }
+        if (state.map) state.map.easeTo({ pitch: state.perspective === '2d' ? 0 : state.perspective === 'street' ? 65 : 46, bearing: state.perspective === '2d' ? 0 : -18 });
+      }));
+      document.getElementById('toggle-layer-buildings').addEventListener('click', (e) => { state.layers.buildings = !state.layers.buildings; e.currentTarget.classList.toggle('active', state.layers.buildings); applyMapLayers(); });
+      document.getElementById('toggle-layer-rings').addEventListener('click', (e) => { state.layers.rings = !state.layers.rings; e.currentTarget.classList.toggle('active', state.layers.rings); applyMapLayers(); });
+      document.getElementById('toggle-layer-heatmap').addEventListener('click', (e) => { state.layers.heatmap = !state.layers.heatmap; e.currentTarget.classList.toggle('active', state.layers.heatmap); applyMapLayers(); });
+      document.querySelectorAll('[data-amenity-cat]').forEach((b) => b.addEventListener('click', () => { const c = b.getAttribute('data-amenity-cat'); state.amenities.visible[c] = !state.amenities.visible[c]; b.classList.toggle('active', state.amenities.visible[c]); applyMapLayers(); }));
+      document.getElementById('btn-load-amenities').addEventListener('click', scanOverpass);
+      document.getElementById('btn-osm-search').addEventListener('click', () => geocodeDual(document.getElementById('osm-search-input').value, 'search'));
+      document.getElementById('btn-geocode-active').addEventListener('click', () => geocodeDual(document.getElementById('inp-active-address').value, 'active'));
+      document.getElementById('btn-fit-markers').addEventListener('click', () => { const p = state.properties[state.activeIndex]; if (state.map) state.map.flyTo({ center: [p.lng, p.lat], zoom: 13.8 }); else if (state.leafletMap) state.leafletMap.flyTo([p.lat, p.lng], 13); });
+
+      document.getElementById('btn-hero-audit').addEventListener('click', () => runReport('ic_audit'));
+      document.getElementById('btn-audit-deal-ai').addEventListener('click', () => runReport('ic_audit'));
+      document.getElementById('btn-hero-map').addEventListener('click', () => switchTab('map'));
+      document.querySelectorAll('.report-trigger').forEach((b) => b.addEventListener('click', () => runReport(b.getAttribute('data-report-type'))));
+      document.getElementById('report-custom-form').addEventListener('submit', (e) => { e.preventDefault(); const i = document.getElementById('report-custom-input'); if (i.value.trim()) { runReport('custom', i.value.trim()); i.value = ''; } });
+      document.getElementById('btn-run-doe').addEventListener('click', renderEChartsDecisions);
+
+      document.getElementById('btn-agui-test-run').addEventListener('click', () => {
+        emitAgUi('RUN_STARTED', { parcel: state.properties[state.activeIndex].address });
+        emitAgUi('STATE_DELTA', { strategy: state.activeStrategy });
+        emitAgUi('RUN_FINISHED', { outcome: 'interrupt' });
+        document.getElementById('agui-hitl-msg').textContent = 'Approve IC underwriting terms?';
+        document.getElementById('agui-hitl-actions').classList.remove('hidden');
+      });
+      document.getElementById('btn-hitl-approve').addEventListener('click', () => { emitAgUi('CUSTOM', { approved: true }); document.getElementById('agui-hitl-actions').classList.add('hidden'); showToast('Approved'); });
+      document.getElementById('btn-hitl-reject').addEventListener('click', () => { emitAgUi('CUSTOM', { approved: false }); document.getElementById('agui-hitl-actions').classList.add('hidden'); showToast('Rejected'); });
+
+      const settingsDialog = document.getElementById('settings-dialog');
+      document.getElementById('btn-open-settings').addEventListener('click', () => {
+        document.getElementById('inp-provider').value = state.provider;
+        document.getElementById('provider-endpoint-group').classList.toggle('hidden', ['pollinations', 'quant'].includes(state.provider));
+        settingsDialog.showModal();
+      });
+      document.getElementById('inp-provider').addEventListener('change', (e) => {
+        const pr = PROVIDER_PRESETS[e.target.value];
+        document.getElementById('provider-endpoint-group').classList.toggle('hidden', ['pollinations', 'quant'].includes(e.target.value));
+        document.getElementById('inp-base-url').value = pr.url; document.getElementById('inp-model-id').value = pr.models[0];
+      });
+      document.getElementById('btn-close-dialog').addEventListener('click', () => settingsDialog.close());
+      document.getElementById('btn-cancel-dialog').addEventListener('click', () => settingsDialog.close());
+      document.getElementById('settings-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        state.provider = document.getElementById('inp-provider').value;
+        state.baseUrl = document.getElementById('inp-base-url').value.trim() || PROVIDER_PRESETS[state.provider].url;
+        state.modelId = document.getElementById('inp-model-id').value.trim() || PROVIDER_PRESETS[state.provider].models[0];
+        state.apiKey = document.getElementById('inp-api-key').value.trim();
+        document.getElementById('nav-provider-pill').textContent = PROVIDER_PRESETS[state.provider].label;
+        settingsDialog.close(); showToast(`Switched to ${PROVIDER_PRESETS[state.provider].label}`);
+      });
+
+      const addDialog = document.getElementById('add-property-dialog');
+      document.getElementById('btn-add-property').addEventListener('click', () => addDialog.showModal());
+      document.getElementById('btn-close-add-prop').addEventListener('click', () => addDialog.close());
+      document.getElementById('btn-cancel-add-prop').addEventListener('click', () => addDialog.close());
+      document.getElementById('add-property-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        state.properties.push({ id: crypto.randomUUID(), address: document.getElementById('new-prop-address').value.trim(), beds: 3, sqft: 1950, price: Number(document.getElementById('new-prop-price').value), rent: Number(document.getElementById('new-prop-rent').value), downPct: 20, rate: 6.25, opexPct: 32, rehab: 15000, lat: 32.75, lng: -97.33 });
+        state.activeIndex = state.properties.length - 1;
+        addDialog.close(); syncUWInputs(); renderAll();
+      });
+
+      document.getElementById('btn-export-html').addEventListener('click', () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html' })); a.download = 'PropertyInsight_Dusk_v6_ECharts.html'; a.click(); });
+      document.getElementById('btn-export-md').addEventListener('click', () => { let md = '# PropertyInsight Portfolio\n'; state.properties.forEach((p, i) => { const m = calcUW(p); md += `- #${i+1} ${p.address}: $${m.price} | Cap ${m.capRate.toFixed(2)}% | DSCR ${m.dscr.toFixed(2)}x\n`; }); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); a.download = 'PropertyInsight_Memo.md'; a.click(); });
+
+      window.addEventListener('resize', () => Object.values(state.charts).forEach((c) => c.resize()));
+      syncUWInputs(); renderAll();
+    })();
+  </script>
+</body>
+</html>

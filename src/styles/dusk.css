@@ -564,3 +564,20 @@ dialog::backdrop {
 @media (prefers-reduced-motion: reduce) {
   .hero-photo, .sig-apri { animation: none; }
 }
+
+@media print {
+  body { background: #ffffff !important; color: #111827 !important; font-size: 12px; }
+  .top-nav, .hero-bg, .hero-photo, .hero-scrim, .tab-bar, .btn-peri, .btn-ghost, .btn-apri, .row-icon-btn, dialog, .toast, input[type="range"] {
+    display: none !important;
+  }
+  .hero-stage { min-height: auto !important; padding: 0.75rem 0 !important; border-bottom: 2px solid #111827 !important; }
+  .glass, .inner-well {
+    background: #ffffff !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+    border: 1px solid #d1d5db !important;
+    break-inside: avoid;
+  }
+  .text-muted, .text-ink-2 { color: #374151 !important; }
+  .badge { border: 1px solid #111827 !important; color: #111827 !important; background: #f3f4f6 !important; }
+}

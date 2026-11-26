@@ -340,4 +340,62 @@ export class ChartManager {
       ],
     });
   }
+
+  renderSensitivityHeatmap(grid: {
+    priceSteps: number[];
+    rateSteps: number[];
+    cells: [number, number, number][];
+  }): void {
+    const c = this.getOrInit('echart-heatmap');
+    if (!c) return;
+    c.setOption({
+      backgroundColor: 'transparent',
+      tooltip: {
+        position: 'top',
+        backgroundColor: '#1f2230',
+        borderColor: '#3a3f54',
+        textStyle: { color: '#f3f2ee', fontSize: 12 },
+        formatter: (params: { value: [number, number, number] }) => {
+          const [pi, ri, dscr] = params.value;
+          return `Price: <strong>$${grid.priceSteps[pi].toLocaleString()}</strong><br/>Rate: <strong>${grid.rateSteps[ri].toFixed(
+            2
+          )}%</strong><br/>DSCR: <strong>${dscr.toFixed(2)}x</strong>`;
+        },
+      },
+      grid: { left: 60, right: 16, top: 14, bottom: 34 },
+      xAxis: {
+        type: 'category',
+        data: grid.priceSteps.map((v) => `$${Math.round(v / 1000)}k`),
+        axisLabel: { color: '#b4b8cc', fontSize: 10 },
+        axisLine: { lineStyle: { color: '#3a3f54' } },
+      },
+      yAxis: {
+        type: 'category',
+        data: grid.rateSteps.map((r) => `${r.toFixed(2)}%`),
+        axisLabel: { color: '#b4b8cc', fontSize: 10 },
+        axisLine: { lineStyle: { color: '#3a3f54' } },
+      },
+      visualMap: {
+        min: 0.9,
+        max: 1.5,
+        show: false,
+        inRange: { color: ['#a8466a', '#c98e5b', '#4eb88e'] },
+      },
+      series: [
+        {
+          name: 'DSCR',
+          type: 'heatmap',
+          data: grid.cells,
+          label: {
+            show: true,
+            color: '#141722',
+            fontWeight: 600,
+            fontSize: 11,
+            formatter: (p: { value: [number, number, number] }) => `${p.value[2].toFixed(2)}x`,
+          },
+          itemStyle: { borderColor: '#1d202d', borderWidth: 2, borderRadius: 4 },
+        },
+      ],
+    });
+  }
 }

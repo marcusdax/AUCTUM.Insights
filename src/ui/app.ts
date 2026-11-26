@@ -16,6 +16,13 @@ import {
   solveTargetPrice,
 } from '../engine/underwriting';
 import { computeDOEFactorial, runMonteCarloStress } from '../engine/doe';
+import {
+  buildSensitivityGrid,
+  compute21Buydown,
+  computeTaxShield,
+  decodeShareableDeal,
+  encodeShareableDeal,
+} from '../engine/financing';
 import { computeLocalShapley } from '../engine/shapley';
 import { evaluateLocalStormHazard } from '../engine/fiduciary';
 import { PERSONA_LIST, PERSONA_PROFILES } from '../engine/personas';
@@ -424,6 +431,7 @@ export function initApp(): void {
     const locScore = getLocationScore(p);
 
     charts.renderDecisionsSuite(m, doe, mc, locScore, p.roofAgeYears);
+    charts.renderSensitivityHeatmap(buildSensitivityGrid(p, state.activeStrategy));
 
     const composite = Math.round(
       (Math.min(100, m.capRate * 12) +
@@ -559,7 +567,16 @@ export function initApp(): void {
 
     const p = getActiveParcel();
     const m = calcUnderwriting(p, state.activeStrategy);
-    const solver = solveTargetPrice(p, state.activeStrategy, 'dscr', 1.25);
+    const solverMetric =
+      ((document.getElementById('solver-metric-select') as HTMLSelectElement | null)?.value as
+        | 'dscr'
+        | 'capRate'
+        | 'coc') || 'dscr';
+    const solverTarget =
+      Number((document.getElementById('solver-target-val') as HTMLInputElement | null)?.value) || 1.25;
+    const solver = solveTargetPrice(p, state.activeStrategy, solverMetric, solverTarget);
+    const bd = compute21Buydown(p, state.activeStrategy);
+    const tax = computeTaxShield(p, state.activeStrategy, 0.32);
 
     const setText = (id: string, txt: string) => {
       const el = document.getElementById(id);
@@ -593,17 +610,50 @@ export function initApp(): void {
     setHtml('m-beo', fmtPctHtml(m.breakEvenOccPct));
     setHtml('m-onepct', fmtPctHtml(m.onePctRatio));
 
+    const unitSuffix = solverMetric === 'dscr' ? 'x' : '%';
+    const metricLabel =
+      solverMetric === 'dscr' ? 'DSCR' : solverMetric === 'capRate' ? 'Cap Rate' : 'CoC';
     const solverEl = document.getElementById('target-price-solver-readout');
     if (solverEl) {
       solverEl.innerHTML = solver.achievable
-        ? `Max price for <strong>1.25x DSCR</strong>: <strong class="num text-accent">${fmtDollars(
+        ? `Max price for <strong>${solverTarget}${unitSuffix} ${metricLabel}</strong>: <strong class="num text-accent">${fmtDollars(
             solver.maxPrice
           )}</strong> (${
             solver.discountDollars > 0
               ? `-${fmtDollars(solver.discountDollars)} / -${solver.discountPct}% from ask`
-              : 'Clears 1.25x at current ask'
+              : 'Clears target at current ask'
           })`
-        : 'Target 1.25x DSCR requires higher rent or lower debt rate.';
+        : `Target ${solverTarget}${unitSuffix} ${metricLabel} requires higher rent or lower debt rate.`;
+    }
+
+    const bdCard = document.getElementById('buydown-card');
+    if (bdCard) {
+      bdCard.innerHTML = `
+        <div class="flex-between row-rule" style="padding-bottom:0.45rem">
+          <h4>2-1 Rate Buydown &amp; Seller Credit</h4>
+          <span class="badge badge-peri">Credit ${fmtDollars(bd.requiredSellerCredit)}</span>
+        </div>
+        <div class="grid-3" style="padding-top:0.35rem">
+          <div><div class="text-muted">Yr 1 (${bd.yr1Rate.toFixed(2)}%)</div><strong class="num text-sm text-ok">${fmtDollars(bd.yr1Payment)}/mo</strong><div class="text-muted">Save ${fmtDollars(bd.yr1MonthlySavings)}/mo</div></div>
+          <div><div class="text-muted">Yr 2 (${bd.yr2Rate.toFixed(2)}%)</div><strong class="num text-sm">${fmtDollars(bd.yr2Payment)}/mo</strong><div class="text-muted">Save ${fmtDollars(bd.yr2MonthlySavings)}/mo</div></div>
+          <div><div class="text-muted">Yr 3+ (${bd.yr3PlusRate.toFixed(2)}%)</div><strong class="num text-sm">${fmtDollars(bd.yr3PlusPayment)}/mo</strong><div class="text-ok">+${bd.yr1DscrLift.toFixed(2)}x Yr1 DSCR</div></div>
+        </div>
+      `;
+    }
+
+    const taxCard = document.getElementById('tax-shield-card');
+    if (taxCard) {
+      taxCard.innerHTML = `
+        <div class="flex-between row-rule" style="padding-bottom:0.45rem">
+          <h4>27.5-Yr Depreciation Tax Shield (32% Bracket)</h4>
+          <span class="badge badge-acquire">After-Tax CoC ${tax.afterTaxCocPct.toFixed(2)}%</span>
+        </div>
+        <div class="grid-3" style="padding-top:0.35rem">
+          <div><div class="text-muted">Annual Depr.</div><strong class="num text-sm">${fmtDollars(tax.annualDepreciation)}/yr</strong><div class="text-muted">Basis ${fmtDollars(tax.depreciableBasis)}</div></div>
+          <div><div class="text-muted">Yr-1 Taxable</div><strong class="num text-sm">${fmtDollars(tax.taxableIncomeYr1)}</strong><div class="text-muted">After interest + depr.</div></div>
+          <div><div class="text-muted">After-Tax CF</div><strong class="num text-sm text-ok">${fmtDollars(tax.afterTaxCashFlowYr1)}/yr</strong><div class="text-muted">Est. tax impact ${fmtDollars(tax.estimatedTaxSavingsYr1)}</div></div>
+        </div>
+      `;
     }
 
     const brrrrEl = document.getElementById('brrrr-readout');
@@ -1236,6 +1286,77 @@ export function initApp(): void {
     if (kdEl) {
       kdEl.textContent = kdOk ? 'K-Dense: Live' : 'K-Dense: Skills Ready';
       kdEl.className = `badge ${kdOk ? 'badge-acquire' : 'badge-peri'}`;
+    }
+  }
+
+  // Interactive Target-Price Solver controls
+  document.getElementById('solver-metric-select')?.addEventListener('change', (e) => {
+    const val = (e.target as HTMLSelectElement).value;
+    const inp = document.getElementById('solver-target-val') as HTMLInputElement | null;
+    if (inp) {
+      inp.value = val === 'dscr' ? '1.25' : val === 'capRate' ? '7.0' : '10.0';
+      inp.step = val === 'dscr' ? '0.05' : '0.25';
+    }
+    renderAll();
+  });
+  document.getElementById('solver-target-val')?.addEventListener('input', () => renderAll());
+  document.getElementById('btn-apply-solved-price')?.addEventListener('click', () => {
+    const p = getActiveParcel();
+    const metric =
+      ((document.getElementById('solver-metric-select') as HTMLSelectElement | null)?.value as
+        | 'dscr'
+        | 'capRate'
+        | 'coc') || 'dscr';
+    const target =
+      Number((document.getElementById('solver-target-val') as HTMLInputElement | null)?.value) || 1.25;
+    const solved = solveTargetPrice(p, state.activeStrategy, metric, target);
+    if (!solved.achievable) {
+      showToast('Target not achievable by price adjustment alone');
+      return;
+    }
+    p.price = solved.maxPrice;
+    state.lastAttribution = null;
+    saveState();
+    syncUWInputs();
+    renderAll();
+    showToast(`Applied solved offer price: ${fmtDollars(solved.maxPrice)}`);
+    emitAgUi('STATE_DELTA', { action: 'apply_target_price', maxPrice: solved.maxPrice, metric, target });
+  });
+
+  // Shareable Deal Link (#deal=<token>) & Print PDF
+  document.getElementById('btn-share-deal')?.addEventListener('click', async () => {
+    const token = encodeShareableDeal({
+      v: 71,
+      persona: state.persona,
+      strategy: state.activeStrategy,
+      parcel: getActiveParcel(),
+    });
+    const shareUrl = `${window.location.origin}${window.location.pathname}#deal=${token}`;
+    window.history.replaceState(null, '', `#deal=${token}`);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      showToast('Copied shareable deal URL to clipboard');
+    } catch {
+      showToast('Updated URL hash — copy address bar to share');
+    }
+  });
+  document.getElementById('btn-print-pdf')?.addEventListener('click', () => window.print());
+
+  // Hydrate shared deal from URL hash if present
+  if (window.location.hash.startsWith('#deal=')) {
+    const shared = decodeShareableDeal(window.location.hash.slice('#deal='.length));
+    if (shared) {
+      state.persona = shared.persona;
+      state.activeStrategy = shared.strategy;
+      const existingIdx = state.properties.findIndex((x) => x.address === shared.parcel.address);
+      if (existingIdx >= 0) {
+        state.properties[existingIdx] = shared.parcel;
+        state.activeIndex = existingIdx;
+      } else {
+        state.properties.push({ ...shared.parcel, id: `shared-${Date.now()}` });
+        state.activeIndex = state.properties.length - 1;
+      }
+      showToast(`Loaded shared deal: ${shared.parcel.address}`);
     }
   }
 

@@ -1213,10 +1213,18 @@ export function initApp(): void {
   });
 
   async function refreshConnectorBadges(): Promise<void> {
-    const [mnOk, kdOk] = await Promise.all([
-      probeMasternexHealth({ baseUrl: state.masternexUrl, apiKey: state.masternexKey }),
-      probeKDenseHealth(state.kdenseUrl),
-    ]);
+    let mnOk = false;
+    if (window.location.protocol.startsWith('http')) {
+      const proxyUrl = `${window.location.origin}/api/masternex`;
+      if (await probeMasternexHealth({ baseUrl: proxyUrl, apiKey: state.masternexKey })) {
+        state.masternexUrl = proxyUrl;
+        mnOk = true;
+      }
+    }
+    if (!mnOk) {
+      mnOk = await probeMasternexHealth({ baseUrl: state.masternexUrl, apiKey: state.masternexKey });
+    }
+    const kdOk = await probeKDenseHealth(state.kdenseUrl);
     state.masternexOnline = mnOk;
     state.kdenseOnline = kdOk;
     const mnEl = document.getElementById('status-masternex');

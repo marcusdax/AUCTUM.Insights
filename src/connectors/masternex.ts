@@ -109,7 +109,11 @@ export async function runMasternexUnderwrite(params: {
         ).toFixed(1)
       ),
       hexCell: String(data.hex_cell ?? `h3-r10:${Math.round(p.lat * 100)}:${Math.round(p.lng * 100)}`),
-      packetId: String(dossier.packet_id ?? 'acp-live'),
+      packetId: String(
+        typeof dossier.packet_id === 'object' && dossier.packet_id !== null
+          ? dossier.packet_id.packet_id ?? dossier.packet_id.record_hash ?? 'acp-live'
+          : dossier.packet_id ?? 'acp-live'
+      ),
       signatureAlg: String(dossier.signature_alg ?? 'ML-DSA-87'),
       signatureVerified: Boolean(dossier.signature_verified),
       ledgerVerified: Boolean(dossier.ledger_verified),

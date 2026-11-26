@@ -130,24 +130,29 @@
     </div>
 
     <!-- Reversed-Out Ink Band Figures -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 p-4 gap-3" style="background: var(--color-ink); color: var(--color-paper);">
+    <div class="grid grid-cols-2 sm:grid-cols-5 p-4 gap-3" style="background: var(--color-ink); color: var(--color-paper);">
       <div>
         <div class="ed-label text-xs" style="color: var(--color-rule);">Cap rate</div>
-        <div id="kpi-cap" class="ed-head text-3xl mt-1" style="color: var(--color-paper);">7.56%</div>
+        <div id="kpi-cap" class="ed-head text-2xl mt-1" style="color: var(--color-paper);">7.56%</div>
       </div>
       <div class="sm:pl-3 sm:border-l" style="border-color: var(--color-ink-2);">
         <div class="ed-label text-xs" style="color: var(--color-rule);">Cash-on-cash</div>
-        <div id="kpi-coc" class="ed-head text-3xl mt-1" style="color: var(--color-paper);">8.84%</div>
+        <div id="kpi-coc" class="ed-head text-2xl mt-1" style="color: var(--color-paper);">8.84%</div>
       </div>
       <div class="sm:pl-3 sm:border-l" style="border-color: var(--color-ink-2);">
         <div class="ed-label text-xs" style="color: var(--color-rule);">Net cash / mo</div>
-        <div id="kpi-cf" class="ed-head text-3xl mt-1" style="color: var(--color-paper);">+$531</div>
+        <div id="kpi-cf" class="ed-head text-2xl mt-1" style="color: var(--color-paper);">+$531</div>
+      </div>
+      <div class="sm:pl-3 sm:border-l" style="border-color: var(--color-ink-2);">
+        <div class="ed-label text-xs" style="color: var(--color-rule);">Break-even occ</div>
+        <div id="kpi-beo" class="ed-head text-2xl mt-1" style="color: var(--color-paper);">81%</div>
       </div>
       <div class="sm:pl-3 sm:border-l" style="border-color: var(--color-ink-2);">
         <div class="ed-label text-xs" style="color: var(--color-rule);">5-yr equity</div>
-        <div id="kpi-eq" class="ed-head text-3xl mt-1" style="color: var(--color-paper);">$174k</div>
+        <div id="kpi-eq" class="ed-head text-2xl mt-1" style="color: var(--color-paper);">$174k</div>
       </div>
     </div>
+    <div id="solver-line" class="text-xs pt-1" style="color: var(--color-muted);"></div>
   </div>
 
   <script>
@@ -158,8 +163,8 @@
       const rateEl = document.getElementById('inp-rate');
       const opexEl = document.getElementById('inp-opex');
 
-      function computeMetrics() {
-        const price = Number(priceEl.value), baseRent = Number(rentEl.value), rate = Number(rateEl.value) / 100, opexRatio = Number(opexEl.value) / 100;
+      function computeMetrics(overridePrice) {
+        const price = overridePrice ?? Number(priceEl.value), baseRent = Number(rentEl.value), rate = Number(rateEl.value) / 100, opexRatio = Number(opexEl.value) / 100;
         let effectiveRent = baseRent, downPct = 0.20, rehabCost = 0, arvMultiplier = 1.0, effectiveOpex = opexRatio;
         if (currentStrategy === 'brrrr') { rehabCost = Math.round(price * 0.12); arvMultiplier = 1.24; effectiveRent = baseRent * 1.12; downPct = 0.15; }
         else if (currentStrategy === 'str') { effectiveRent = baseRent * 1.55; effectiveOpex = Math.min(0.68, opexRatio + 0.14); }
@@ -168,13 +173,24 @@
         const aDebt = (loan * (mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1)) * 12;
         const cashIn = Math.max(1, price * downPct + price * 0.03 + (currentStrategy === 'brrrr' ? rehabCost * 0.35 : 0));
         const aCf = noi - aDebt, mCf = aCf / 12, coc = (aCf / cashIn) * 100, dscr = noi / Math.max(1, aDebt);
+        const beo = Math.min(150, ((effectiveRent * effectiveOpex + aDebt / 12) / Math.max(1, effectiveRent)) * 100);
         const propVal5 = price * arvMultiplier * Math.pow(1.04, 5);
         const rem5 = loan * (Math.pow(1 + mr, n) - Math.pow(1 + mr, 60)) / (Math.pow(1 + mr, n) - 1);
-        return { price, baseRent, rate, opexRatio, capRate, coc, mCf, dscr, eq5: Math.max(0, propVal5 - rem5) };
+        return { price, baseRent, rate, opexRatio, capRate, coc, mCf, dscr, beo, eq5: Math.max(0, propVal5 - rem5) };
+      }
+
+      function solveMaxPrice125() {
+        let lo = 40000, hi = 2500000;
+        for (let i = 0; i < 32; i++) {
+          const mid = (lo + hi) / 2;
+          if (computeMetrics(mid).dscr >= 1.25) lo = mid; else hi = mid;
+        }
+        return Math.round(lo / 500) * 500;
       }
 
       function renderUI() {
         const m = computeMetrics();
+        const maxP = solveMaxPrice125();
         document.getElementById('val-price').textContent = '$' + m.price.toLocaleString();
         document.getElementById('val-rent').textContent = '$' + m.baseRent.toLocaleString();
         document.getElementById('val-rate').textContent = (m.rate * 100).toFixed(2) + '%';
@@ -182,8 +198,10 @@
         document.getElementById('kpi-cap').textContent = m.capRate.toFixed(2) + '%';
         document.getElementById('kpi-coc').textContent = m.coc.toFixed(2) + '%';
         document.getElementById('kpi-cf').textContent = (m.mCf >= 0 ? '+$' : '-$') + Math.abs(Math.round(m.mCf)).toLocaleString();
+        document.getElementById('kpi-beo').textContent = Math.round(m.beo) + '%';
         document.getElementById('kpi-eq').textContent = '$' + Math.round(m.eq5 / 1000) + 'k';
         document.getElementById('deal-tag').textContent = `${m.dscr >= 1.25 ? 'Cleared' : 'Review'} · ${m.dscr.toFixed(2)}x`;
+        document.getElementById('solver-line').textContent = `Target-Price Solver (1.25x DSCR): Max acquisition price $${maxP.toLocaleString()} (${maxP >= m.price ? 'clears at current ask' : '-$' + (m.price - maxP).toLocaleString() + ' below ask'})`;
       }
 
       document.querySelectorAll('.strat-btn').forEach((btn) => {

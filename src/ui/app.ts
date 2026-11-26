@@ -44,6 +44,7 @@ import { buildGoogleMapsLinks } from '../connectors/googleMaps';
 import { PROVIDER_PRESETS, invokeAIProvider } from '../connectors/aiProviders';
 import { ChartManager } from './charts';
 import { SpatialMapController } from './map';
+import { LabAppsController, type LabAppId } from './labApps';
 
 const STORAGE_KEY = 'auctum_insights_v7_state';
 
@@ -61,7 +62,7 @@ interface AppState {
   properties: PropertyParcel[];
   activeIndex: number;
   activeStrategy: UnderwritingStrategy;
-  activeTab: 'underwrite' | 'compare' | 'map' | 'reports' | 'decisions' | 'ecosystem';
+  activeTab: 'underwrite' | 'compare' | 'map' | 'reports' | 'decisions' | 'ecosystem' | 'lab';
   locationAudits: Record<string, LocationAudit>;
   lastAttribution: ShapleyAttribution | null;
   masternexOnline: boolean;
@@ -198,6 +199,23 @@ export function initApp(): void {
       spatial.applyOverlays();
     },
     getGoogleMapsKey: () => state.googleMapsKey,
+  });
+
+  const labApps = new LabAppsController({
+    getParcel: getActiveParcel,
+    getProperties: () => state.properties,
+    getStrategy: () => state.activeStrategy,
+    getLocationAudit: (id) => state.locationAudits[id],
+    getAttribution: () => state.lastAttribution,
+    setAttribution: (attr) => {
+      state.lastAttribution = attr;
+    },
+    getMasternexConfig: () => ({ baseUrl: state.masternexUrl, apiKey: state.masternexKey }),
+    triggerOverpassScan: async () => {
+      const audit = await spatial.scanOverpassPOIs(1600);
+      showToast(audit ? `Overpass scan complete: ${audit.score}/100` : 'Overpass mirror busy');
+    },
+    showToast,
   });
 
   // =========================================================================
@@ -532,9 +550,20 @@ export function initApp(): void {
             <div class="text-sm" style="font-weight:500">${escHtml(sk.title)}</div>
             <div class="text-xs text-muted">${escHtml(sk.description)}</div>
           </div>
-          <button type="button" class="btn-ghost btn-sm kdense-copy-btn" data-skill-id="${sk.id}">Copy Prompt</button>
+          <div class="flex-row" style="flex-shrink:0">
+            <button type="button" class="btn-peri btn-sm kdense-launch-btn" data-launch-app="${sk.id}">Launch App</button>
+            <button type="button" class="btn-ghost btn-sm kdense-copy-btn" data-skill-id="${sk.id}">Copy Prompt</button>
+          </div>
         </div>`
       ).join('');
+
+      kdenseBox.querySelectorAll<HTMLButtonElement>('.kdense-launch-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const appId = btn.dataset.launchApp as LabAppId;
+          switchTab('lab');
+          labApps.openApp(appId);
+        });
+      });
 
       kdenseBox.querySelectorAll<HTMLButtonElement>('.kdense-copy-btn').forEach((btn) => {
         btn.addEventListener('click', async () => {
@@ -704,11 +733,12 @@ export function initApp(): void {
     if (state.activeTab === 'map') renderSpatialExtras();
     if (state.activeTab === 'decisions') renderDecisionsPanel();
     if (state.activeTab === 'ecosystem') renderEcosystemPanel();
+    if (state.activeTab === 'lab') labApps.render();
   }
 
   function switchTab(id: AppState['activeTab']): void {
     state.activeTab = id;
-    (['underwrite', 'compare', 'map', 'reports', 'decisions', 'ecosystem'] as const).forEach((t) => {
+    (['underwrite', 'compare', 'map', 'reports', 'decisions', 'ecosystem', 'lab'] as const).forEach((t) => {
       document.getElementById(`panel-${t}`)?.classList.toggle('hidden', t !== id);
     });
     document.querySelectorAll<HTMLButtonElement>('.ws-tab').forEach((b) => {

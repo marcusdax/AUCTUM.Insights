@@ -89,20 +89,45 @@ const CURATED_HOUSING_BENCHMARKS: HFBenchmarkRow[] = [
  */
 export async function fetchHFDatasetBenchmarks(
   presetId: string,
-  length = 6
+  length = 6,
+  offset = 0
 ): Promise<HFDatasetResponse> {
   const preset = HF_DATASET_PRESETS.find((p) => p.id === presetId) ?? HF_DATASET_PRESETS[0];
-  const qs = new URLSearchParams({
+  return fetchCustomHFDataset({
     dataset: preset.dataset,
     config: preset.config,
     split: preset.split,
-    offset: '0',
+    length,
+    offset,
+    description: preset.description,
+  });
+}
+
+export async function fetchCustomHFDataset(params: {
+  dataset: string;
+  config?: string;
+  split?: string;
+  length?: number;
+  offset?: number;
+  description?: string;
+}): Promise<HFDatasetResponse> {
+  const dataset = params.dataset.trim() || HF_DATASET_PRESETS[0].dataset;
+  const config = params.config?.trim() || 'default';
+  const split = params.split?.trim() || 'train';
+  const length = Math.min(25, Math.max(1, params.length ?? 6));
+  const offset = Math.max(0, params.offset ?? 0);
+
+  const qs = new URLSearchParams({
+    dataset,
+    config,
+    split,
+    offset: String(offset),
     length: String(length),
   });
 
   try {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 4500);
+    const t = setTimeout(() => ctrl.abort(), 5000);
     const res = await fetch(`https://datasets-server.huggingface.co/rows?${qs.toString()}`, {
       signal: ctrl.signal,
     });
@@ -112,36 +137,46 @@ export async function fetchHFDatasetBenchmarks(
     const rawRows = Array.isArray(data.rows) ? data.rows : [];
     if (!rawRows.length) throw new Error('No rows returned');
 
-    const rows: HFBenchmarkRow[] = rawRows.slice(0, length).map((item: { row?: Record<string, unknown> }, i: number) => {
-      const r = item.row || {};
-      const keys = Object.keys(r);
-      const firstVal = keys[0] ? String(r[keys[0]]).slice(0, 60) : `Row #${i + 1}`;
-      const secondKey = keys[1] || 'field';
-      const secondVal = keys[1] ? String(r[keys[1]]).slice(0, 60) : '';
-      const rest = keys
-        .slice(2, 5)
-        .map((k) => `${k}: ${String(r[k]).slice(0, 40)}`)
-        .join(' · ');
-      return {
-        market: `${preset.dataset} #${i + 1}`,
-        metric: `${keys[0] || 'record'}: ${firstVal}`,
-        value: `${secondKey}: ${secondVal}`,
-        context: rest || preset.description,
-      };
-    });
+    const rows: HFBenchmarkRow[] = rawRows
+      .slice(0, length)
+      .map((item: { row?: Record<string, unknown> }, i: number) => {
+        const r = item.row || {};
+        const keys = Object.keys(r);
+        const firstVal = keys[0] ? String(r[keys[0]]).slice(0, 90) : `Row #${offset + i + 1}`;
+        const secondKey = keys[1] || 'field';
+        const secondVal = keys[1] ? String(r[keys[1]]).slice(0, 70) : '';
+        const rest = keys
+          .slice(2, 5)
+          .map((k) => `${k}: ${String(r[k]).slice(0, 55)}`)
+          .join(' · ');
+        return {
+          market: `${dataset} #${offset + i + 1}`,
+          metric: `${keys[0] || 'record'}: ${firstVal}`,
+          value: `${secondKey}: ${secondVal}`,
+          context: rest || params.description || 'Live Hugging Face Datasets Server row',
+        };
+      });
 
     return {
       mode: 'hf-datasets-live',
-      dataset: preset.dataset,
+      dataset,
       rowCount: rows.length,
       rows,
     };
   } catch {
     return {
       mode: 'curated-fallback',
-      dataset: `${preset.dataset} (Curated Offline Benchmark)`,
+      dataset: `${dataset} (Curated Offline Benchmark)`,
       rowCount: CURATED_HOUSING_BENCHMARKS.length,
       rows: CURATED_HOUSING_BENCHMARKS,
     };
   }
+}
+
+export function hfRowsToCSV(rows: HFBenchmarkRow[]): string {
+  const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+  return [
+    'market,metric,value,context',
+    ...rows.map((r) => [esc(r.market), esc(r.metric), esc(r.value), esc(r.context)].join(',')),
+  ].join('\n');
 }

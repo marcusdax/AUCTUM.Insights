@@ -592,13 +592,89 @@ dialog::backdrop {
 .text-lg { font-size: 1.15rem; }
 .text-xl { font-size: 1.35rem; }
 
+/* Wealth Symphony Bridge Tokens & CTA */
+:root {
+  --ws-navy: #07131F;
+  --ws-navy-mid: #0C1D2E;
+  --ws-brass: #C9A15A;
+  --ws-brass-dim: #9A7840;
+  --ws-brass-glow: rgba(201, 161, 90, 0.18);
+  --ws-brass-border: rgba(201, 161, 90, 0.36);
+  --ws-teal-light: #18A085;
+}
+
+.btn-ws-brass {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--ws-brass-border);
+  background: linear-gradient(135deg, var(--ws-brass) 0%, var(--ws-brass-dim) 100%);
+  color: var(--ws-navy);
+  font: 600 0.78rem/1 var(--font-body);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px var(--ws-brass-glow);
+  transition: transform 0.14s ease, filter 0.16s ease, box-shadow 0.16s ease;
+}
+.btn-ws-brass:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 20px rgba(201, 161, 90, 0.28);
+}
+.btn-ws-brass:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn-ws-brass:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.btn-ws-brass.btn-sm {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 0.75rem;
+}
+
+.badge-ws-brass {
+  background: var(--ws-brass-glow);
+  color: var(--ws-brass);
+  border: 1px solid var(--ws-brass-border);
+}
+.badge-ws-live {
+  background: rgba(24, 160, 133, 0.16);
+  color: var(--ws-teal-light);
+  border: 1px solid rgba(24, 160, 133, 0.38);
+}
+
+/* Compact Iframe Embed Mode (?embed=wealth-symphony) */
+[data-embed="wealth-symphony"] .hero-stage {
+  display: none !important;
+}
+[data-embed="wealth-symphony"] .top-nav {
+  background: linear-gradient(90deg, var(--ws-navy) 0%, var(--ws-navy-mid) 100%);
+  border-bottom: 1px solid var(--ws-brass-border);
+  padding: 0.45rem clamp(0.75rem, 2vw, 1.25rem);
+}
+[data-embed="wealth-symphony"] .nav-standalone-only {
+  display: none !important;
+}
+[data-embed="wealth-symphony"] #ws-embed-badge {
+  display: inline-flex !important;
+}
+[data-embed="wealth-symphony"] main.shell {
+  padding-top: 0.9rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-photo, .sig-apri { animation: none; }
 }
 
 @media print {
   body { background: #ffffff !important; color: #111827 !important; font-size: 12px; }
-  .top-nav, .hero-bg, .hero-photo, .hero-scrim, .tab-bar, .btn-peri, .btn-ghost, .btn-apri, .row-icon-btn, dialog, .toast, input[type="range"] {
+  .top-nav, .hero-bg, .hero-photo, .hero-scrim, .tab-bar, .btn-peri, .btn-ghost, .btn-apri, .btn-ws-brass, .row-icon-btn, dialog, .toast, input[type="range"] {
     display: none !important;
   }
   .hero-stage { min-height: auto !important; padding: 0.75rem 0 !important; border-bottom: 2px solid #111827 !important; }

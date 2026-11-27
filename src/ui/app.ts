@@ -42,6 +42,17 @@ import {
 } from '../connectors/kdense';
 import { buildGoogleMapsLinks } from '../connectors/googleMaps';
 import { PROVIDER_PRESETS, invokeAIProvider } from '../connectors/aiProviders';
+import {
+  WEALTH_SYMPHONY_DEFAULT_URL,
+  type EmbedOptions,
+  isInboundWealthSymphonyMessage,
+  parcelToWealthSymphonyHolding,
+  parseEmbedParams,
+  postToWealthSymphonyHost,
+  probeWealthSymphonyHealth,
+  pushParcelToWealthSymphony,
+  validateHttpUrl,
+} from '../connectors/wealthSymphony';
 import { ChartManager } from './charts';
 import { SpatialMapController } from './map';
 import { LAB_APPS, LabAppsController, type LabAppId } from './labApps';
@@ -58,6 +69,10 @@ interface AppState {
   masternexKey: string;
   kdenseUrl: string;
   googleMapsKey: string;
+  wealthSymphonyUrl: string;
+  wealthSymphonyToken: string;
+  wealthSymphonyOnline: boolean;
+  embedMode: EmbedOptions;
   fiduciaryGuardEnabled: boolean;
   properties: PropertyParcel[];
   activeIndex: number;
@@ -81,6 +96,10 @@ function loadInitialState(): AppState {
     masternexKey: '',
     kdenseUrl: 'http://127.0.0.1:8000',
     googleMapsKey: '',
+    wealthSymphonyUrl: WEALTH_SYMPHONY_DEFAULT_URL,
+    wealthSymphonyToken: '',
+    wealthSymphonyOnline: false,
+    embedMode: { embed: null, persona: null, wsOrigin: null, wsUrl: null },
     fiduciaryGuardEnabled: false,
     properties: JSON.parse(JSON.stringify(DEFAULT_PROPERTIES)),
     activeIndex: 0,
@@ -110,6 +129,9 @@ function loadInitialState(): AppState {
     if (typeof saved.modelId === 'string') base.modelId = saved.modelId;
     if (typeof saved.masternexUrl === 'string') base.masternexUrl = saved.masternexUrl;
     if (typeof saved.kdenseUrl === 'string') base.kdenseUrl = saved.kdenseUrl;
+    if (typeof saved.wealthSymphonyUrl === 'string' && saved.wealthSymphonyUrl.trim()) {
+      base.wealthSymphonyUrl = saved.wealthSymphonyUrl.trim();
+    }
     if (typeof saved.activeStrategy === 'string') base.activeStrategy = saved.activeStrategy;
     if (typeof saved.activeIndex === 'number') {
       base.activeIndex = Math.min(saved.activeIndex, base.properties.length - 1);
@@ -141,6 +163,22 @@ export function initApp(): void {
   const state = loadInitialState();
   const charts = new ChartManager();
 
+  // Parse boot-time embed & persona query params (?embed=wealth-symphony&persona=fiduciary)
+  const embedParams = parseEmbedParams(window.location.search);
+  state.embedMode = embedParams;
+  if (embedParams.wsUrl) {
+    state.wealthSymphonyUrl = embedParams.wsUrl;
+  }
+  if (embedParams.persona) {
+    state.persona = embedParams.persona;
+    state.activeStrategy = PERSONA_PROFILES[embedParams.persona].defaultStrategy;
+    state.fiduciaryGuardEnabled = embedParams.persona === 'fiduciary';
+  }
+  if (embedParams.embed === 'wealth-symphony') {
+    document.documentElement.dataset.embed = 'wealth-symphony';
+    document.getElementById('ws-embed-badge')?.classList.remove('hidden');
+  }
+
   const saveState = () => {
     try {
       const toPersist = {
@@ -150,6 +188,7 @@ export function initApp(): void {
         modelId: state.modelId,
         masternexUrl: state.masternexUrl,
         kdenseUrl: state.kdenseUrl,
+        wealthSymphonyUrl: state.wealthSymphonyUrl,
         activeStrategy: state.activeStrategy,
         activeIndex: state.activeIndex,
         properties: state.properties,
@@ -734,6 +773,10 @@ export function initApp(): void {
     if (state.activeTab === 'decisions') renderDecisionsPanel();
     if (state.activeTab === 'ecosystem') renderEcosystemPanel();
     if (state.activeTab === 'lab') labApps.render();
+
+    if (state.embedMode.embed === 'wealth-symphony') {
+      scheduleWealthSymphonyStateSync();
+    }
   }
 
   function switchTab(id: AppState['activeTab']): void {
@@ -1257,6 +1300,10 @@ export function initApp(): void {
     (document.getElementById('inp-masternex-key') as HTMLInputElement).value = state.masternexKey;
     (document.getElementById('inp-kdense-url') as HTMLInputElement).value = state.kdenseUrl;
     (document.getElementById('inp-gmaps-key') as HTMLInputElement).value = state.googleMapsKey;
+    const wsUrlInp = document.getElementById('inp-ws-url') as HTMLInputElement | null;
+    const wsTokInp = document.getElementById('inp-ws-token') as HTMLInputElement | null;
+    if (wsUrlInp) wsUrlInp.value = state.wealthSymphonyUrl;
+    if (wsTokInp) wsTokInp.value = state.wealthSymphonyToken;
     settingsDialog?.showModal();
   });
   provSel?.addEventListener('change', (e) => {
@@ -1285,6 +1332,10 @@ export function initApp(): void {
       (document.getElementById('inp-kdense-url') as HTMLInputElement).value.trim() ||
       'http://127.0.0.1:8000';
     state.googleMapsKey = (document.getElementById('inp-gmaps-key') as HTMLInputElement).value.trim();
+    const wsUrlVal = (document.getElementById('inp-ws-url') as HTMLInputElement | null)?.value.trim() || '';
+    state.wealthSymphonyUrl = validateHttpUrl(wsUrlVal) || WEALTH_SYMPHONY_DEFAULT_URL;
+    state.wealthSymphonyToken =
+      (document.getElementById('inp-ws-token') as HTMLInputElement | null)?.value.trim() || '';
     saveState();
     settingsDialog?.close();
     renderAll();
@@ -1304,11 +1355,16 @@ export function initApp(): void {
     if (!mnOk) {
       mnOk = await probeMasternexHealth({ baseUrl: state.masternexUrl, apiKey: state.masternexKey });
     }
-    const kdOk = await probeKDenseHealth(state.kdenseUrl);
+    const [kdOk, wsOk] = await Promise.all([
+      probeKDenseHealth(state.kdenseUrl),
+      probeWealthSymphonyHealth({ baseUrl: state.wealthSymphonyUrl }),
+    ]);
     state.masternexOnline = mnOk;
     state.kdenseOnline = kdOk;
+    state.wealthSymphonyOnline = wsOk;
     const mnEl = document.getElementById('status-masternex');
     const kdEl = document.getElementById('status-kdense');
+    const wsEl = document.getElementById('status-wealth-symphony');
     if (mnEl) {
       mnEl.textContent = mnOk ? 'MASTERNEX: Live' : 'MASTERNEX: Local Fallback';
       mnEl.className = `badge ${mnOk ? 'badge-acquire' : 'badge-peri'}`;
@@ -1317,7 +1373,119 @@ export function initApp(): void {
       kdEl.textContent = kdOk ? 'K-Dense: Live' : 'K-Dense: Skills Ready';
       kdEl.className = `badge ${kdOk ? 'badge-acquire' : 'badge-peri'}`;
     }
+    if (wsEl) {
+      if (wsOk) {
+        wsEl.textContent = 'Wealth Symphony: Live';
+        wsEl.className = 'badge badge-ws-live';
+      } else if (state.embedMode.embed === 'wealth-symphony') {
+        wsEl.textContent = 'Wealth Symphony: Embed Bridge';
+        wsEl.className = 'badge badge-ws-brass';
+      } else {
+        wsEl.textContent = 'Wealth Symphony: Bridge Ready';
+        wsEl.className = 'badge badge-ws-brass';
+      }
+    }
   }
+
+  // Wealth Symphony Bridge: State Sync + 1-Click Push to Plan
+  let wsSyncTimer: number | undefined;
+  function emitWealthSymphonyStateSync(): void {
+    const p = getActiveParcel();
+    const m = calcUnderwriting(p, state.activeStrategy);
+    const holding = parcelToWealthSymphonyHolding(p, m);
+    postToWealthSymphonyHost(
+      'AUCTUM_INSIGHTS_STATE_SYNC',
+      {
+        persona: state.persona,
+        strategy: state.activeStrategy,
+        parcel: p,
+        metrics: m,
+        holding,
+      },
+      state.embedMode.wsOrigin
+    );
+  }
+  function scheduleWealthSymphonyStateSync(): void {
+    window.clearTimeout(wsSyncTimer);
+    wsSyncTimer = window.setTimeout(() => emitWealthSymphonyStateSync(), 80);
+  }
+
+  async function handlePushToWealthSymphony(): Promise<void> {
+    const p = getActiveParcel();
+    const m = calcUnderwriting(p, state.activeStrategy);
+    const pushBtns = [
+      document.getElementById('btn-push-wealth-symphony') as HTMLButtonElement | null,
+      document.getElementById('btn-push-wealth-symphony-uw') as HTMLButtonElement | null,
+      document.getElementById('btn-ws-push-hub') as HTMLButtonElement | null,
+    ].filter((b): b is HTMLButtonElement => Boolean(b));
+
+    pushBtns.forEach((b) => {
+      b.disabled = true;
+    });
+
+    try {
+      const res = await pushParcelToWealthSymphony({
+        cfg: {
+          baseUrl: state.wealthSymphonyUrl,
+          accessToken: state.wealthSymphonyToken,
+        },
+        parcel: p,
+        metrics: m,
+        persona: state.persona,
+        strategy: state.activeStrategy,
+        embedded: state.embedMode.embed === 'wealth-symphony',
+        targetOrigin: state.embedMode.wsOrigin,
+      });
+
+      const summaryEl = document.getElementById('ws-bridge-summary');
+      if (summaryEl) {
+        const modeBadgeClass =
+          res.mode === 'wealth-symphony-live' ? 'badge-ws-live' : 'badge-ws-brass';
+        summaryEl.innerHTML = `
+          <div class="flex-between" style="margin-bottom:0.4rem">
+            <span class="badge ${modeBadgeClass}">${escHtml(res.mode)}</span>
+            <span class="mono text-muted">${escHtml(res.payload.symbol)}</span>
+          </div>
+          <div style="margin-bottom:0.35rem">${escHtml(res.message)}</div>
+          <div class="text-muted mono" style="font-size:0.72rem">${escHtml(res.payload.profileNote)}</div>
+        `;
+      }
+
+      if (res.mode === 'local-preview') {
+        try {
+          await navigator.clipboard.writeText(JSON.stringify(res.payload, null, 2));
+          showToast(`${res.message} (JSON copied)`);
+        } catch {
+          showToast(res.message);
+        }
+      } else {
+        showToast(res.message);
+      }
+
+      emitAgUi('CUSTOM', {
+        action: 'wealth_symphony_push',
+        mode: res.mode,
+        symbol: res.payload.symbol,
+        avgCost: res.payload.holding.avgCost,
+        dscr: res.payload.metrics.dscr,
+        irr10Yr: res.payload.metrics.irr10Yr,
+      });
+    } finally {
+      pushBtns.forEach((b) => {
+        b.disabled = false;
+      });
+    }
+  }
+
+  document.getElementById('btn-push-wealth-symphony')?.addEventListener('click', () => {
+    void handlePushToWealthSymphony();
+  });
+  document.getElementById('btn-push-wealth-symphony-uw')?.addEventListener('click', () => {
+    void handlePushToWealthSymphony();
+  });
+  document.getElementById('btn-ws-push-hub')?.addEventListener('click', () => {
+    void handlePushToWealthSymphony();
+  });
 
   // Interactive Target-Price Solver controls
   document.getElementById('solver-metric-select')?.addEventListener('change', (e) => {
@@ -1419,6 +1587,12 @@ export function initApp(): void {
         showToast(`Persona switched: ${pr.label}`);
       },
     })),
+    {
+      group: 'Action',
+      label: 'Push Active Parcel to Wealth Symphony Plan',
+      hint: 'Wealth Symphony',
+      run: () => void handlePushToWealthSymphony(),
+    },
     {
       group: 'Action',
       label: 'Generate IC Audit Dossier',
@@ -1604,9 +1778,91 @@ export function initApp(): void {
   });
   renderSnapshots();
 
+  // Inbound Wealth Symphony Host postMessage Bridge
+  window.addEventListener('message', (event: MessageEvent) => {
+    if (!isInboundWealthSymphonyMessage(event.data, event.origin, state.embedMode.wsOrigin)) {
+      return;
+    }
+
+    if (event.data.type === 'WEALTH_SYMPHONY_SET_CONFIG') {
+      const cfg = event.data.payload;
+      const nextUrl = validateHttpUrl(cfg.baseUrl);
+      if (nextUrl) {
+        state.wealthSymphonyUrl = nextUrl;
+      }
+      if (typeof cfg.accessToken === 'string') {
+        state.wealthSymphonyToken = cfg.accessToken.trim();
+      }
+      if (cfg.persona && PERSONA_PROFILES[cfg.persona]) {
+        state.persona = cfg.persona;
+        state.activeStrategy = PERSONA_PROFILES[cfg.persona].defaultStrategy;
+        state.fiduciaryGuardEnabled = cfg.persona === 'fiduciary';
+      }
+      if (cfg.theme === 'dusk' || cfg.theme === 'daylight') {
+        applyTheme(cfg.theme);
+      }
+      saveState();
+      syncUWInputs();
+      renderAll();
+      void refreshConnectorBadges();
+      emitWealthSymphonyStateSync();
+      return;
+    }
+
+    if (event.data.type === 'WEALTH_SYMPHONY_LOAD_PARCEL') {
+      const incoming = event.data.payload;
+      const existingIdx = state.properties.findIndex(
+        (x) =>
+          (incoming.id && x.id === incoming.id) ||
+          (incoming.address && x.address === incoming.address)
+      );
+      if (existingIdx >= 0) {
+        state.properties[existingIdx] = {
+          ...state.properties[existingIdx],
+          ...incoming,
+          id: state.properties[existingIdx].id,
+        };
+        state.activeIndex = existingIdx;
+      } else {
+        state.properties.push({
+          ...DEFAULT_PROPERTIES[0],
+          ...incoming,
+          id: incoming.id || `ws-${Date.now()}`,
+        });
+        state.activeIndex = state.properties.length - 1;
+      }
+      state.lastAttribution = null;
+      saveState();
+      syncUWInputs();
+      renderAll();
+      emitWealthSymphonyStateSync();
+      showToast(`Loaded parcel from Wealth Symphony: ${getActiveParcel().address}`);
+      return;
+    }
+
+    if (event.data.type === 'WEALTH_SYMPHONY_REQUEST_STATE') {
+      emitWealthSymphonyStateSync();
+    }
+  });
+
   window.addEventListener('resize', () => charts.resizeAll());
 
   syncUWInputs();
   renderAll();
   void refreshConnectorBadges();
+
+  if (state.embedMode.embed === 'wealth-symphony') {
+    const active = getActiveParcel();
+    postToWealthSymphonyHost(
+      'AUCTUM_INSIGHTS_READY',
+      {
+        embed: 'wealth-symphony',
+        persona: state.persona,
+        strategy: state.activeStrategy,
+        activeParcelId: active.id,
+        address: active.address,
+      },
+      state.embedMode.wsOrigin
+    );
+  }
 }

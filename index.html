@@ -16,24 +16,26 @@
       <div class="brand-mark">AI</div>
       <div>
         <strong style="font-family:var(--font-display);font-size:0.95rem">AUCTUM.Insights</strong>
-        <span class="text-xs text-muted" style="margin-left:6px">v7.5 · Hallmark Dusk</span>
+        <span class="text-xs text-muted" style="margin-left:6px">v7.6 · Hallmark Dusk</span>
       </div>
       <span id="nav-provider-pill" class="badge badge-peri">Pollinations OSS (Free)</span>
+      <span id="ws-embed-badge" class="badge badge-ws-brass hidden">Wealth Symphony Embed</span>
     </div>
 
     <div id="persona-strip" class="persona-strip" role="group" aria-label="User Persona Switcher"></div>
 
     <div class="flex-row">
-      <button id="btn-toggle-theme" type="button" class="btn-ghost btn-sm" title="Toggle Dusk / Daylight theme">☀ Daylight</button>
+      <button id="btn-push-wealth-symphony" type="button" class="btn-ws-brass btn-sm" title="Push active parcel & underwriting metrics to Wealth Symphony Plan">Push to Wealth Symphony Plan</button>
+      <button id="btn-toggle-theme" type="button" class="btn-ghost btn-sm nav-standalone-only" title="Toggle Dusk / Daylight theme">☀ Daylight</button>
       <button id="btn-open-cmdk" type="button" class="btn-ghost btn-sm mono" title="Open Command Palette (Ctrl+K / ⌘K)">⌘K</button>
-      <button id="btn-share-deal" type="button" class="btn-ghost btn-sm" title="Copy shareable URL for this parcel & persona">Share Deal</button>
-      <button id="btn-print-pdf" type="button" class="btn-ghost btn-sm" title="Print or Save Executive PDF Tear-Sheet">Print PDF</button>
-      <label class="btn-ghost btn-sm" style="cursor:pointer" title="Import portfolio CSV">
+      <button id="btn-share-deal" type="button" class="btn-ghost btn-sm nav-standalone-only" title="Copy shareable URL for this parcel & persona">Share Deal</button>
+      <button id="btn-print-pdf" type="button" class="btn-ghost btn-sm nav-standalone-only" title="Print or Save Executive PDF Tear-Sheet">Print PDF</button>
+      <label class="btn-ghost btn-sm nav-standalone-only" style="cursor:pointer" title="Import portfolio CSV">
         Import CSV
         <input id="inp-import-csv" type="file" accept=".csv,text/csv" class="sr-only" />
       </label>
-      <button id="btn-export-csv" type="button" class="btn-ghost btn-sm">Export CSV</button>
-      <button id="btn-export-md" type="button" class="btn-ghost btn-sm">Export Memo</button>
+      <button id="btn-export-csv" type="button" class="btn-ghost btn-sm nav-standalone-only">Export CSV</button>
+      <button id="btn-export-md" type="button" class="btn-ghost btn-sm nav-standalone-only">Export Memo</button>
       <button id="btn-open-settings" type="button" class="btn-peri btn-sm">AI &amp; Connectors</button>
     </div>
   </nav>
@@ -60,6 +62,7 @@
         <div class="flex-row" style="padding-top:0.35rem">
           <span id="status-masternex" class="badge badge-peri">MASTERNEX: Checking…</span>
           <span id="status-kdense" class="badge badge-peri">K-Dense: Checking…</span>
+          <span id="status-wealth-symphony" class="badge badge-ws-brass">Wealth Symphony: Checking…</span>
           <span class="badge badge-peri">HF Hub: Ready</span>
         </div>
       </div>
@@ -208,7 +211,10 @@
               <h3>10-Year Wealth Velocity, Equity &amp; Debt Amortization</h3>
               <p class="text-xs text-muted">Interactive Apache ECharts comparison of Equity, Cumulative Cash Flow, and Debt Paydown</p>
             </div>
-            <button id="btn-audit-deal-ai" type="button" class="btn-peri btn-sm">Build IC Dossier</button>
+            <div class="flex-row">
+              <button id="btn-push-wealth-symphony-uw" type="button" class="btn-ws-brass btn-sm">Push to Wealth Symphony Plan</button>
+              <button id="btn-audit-deal-ai" type="button" class="btn-peri btn-sm">Build IC Dossier</button>
+            </div>
           </div>
           <div id="echart-10yr" class="chart-box-lg"></div>
           <p id="explain-10yr" class="text-xs text-ink-2"></p>
@@ -434,8 +440,21 @@
         </div>
       </div>
 
-      <!-- Right 6: K-Dense Skills + Hugging Face Datasets + Academic Literature -->
+      <!-- Right 6: Wealth Symphony Bridge + K-Dense Skills + Hugging Face Datasets + Academic Literature -->
       <div class="col-6 stack-md">
+        <div class="glass pad-card stack-sm" style="border:1px solid rgba(201,161,90,0.28)">
+          <div class="flex-between row-rule" style="padding-bottom:0.65rem">
+            <div>
+              <h3>Wealth Symphony Bridge (Fiduciary OS)</h3>
+              <p class="text-xs text-muted">1-click upsert to `/api/v1/portfolio` &amp; `/api/v1/profile` or `?embed=wealth-symphony` postMessage bridge</p>
+            </div>
+            <button id="btn-ws-push-hub" type="button" class="btn-ws-brass btn-sm">Push to Wealth Symphony Plan</button>
+          </div>
+          <div id="ws-bridge-summary" class="inner-well pad-well text-xs text-ink-2">
+            Ready to sync active parcel holding &amp; SR 11-7 underwriting metrics to Wealth Symphony.
+          </div>
+        </div>
+
         <div class="glass pad-card stack-sm">
           <div class="row-rule" style="padding-bottom:0.65rem">
             <h3>K-Dense BYOK Scientific Skills Launcher</h3>
@@ -516,6 +535,8 @@
           <input id="inp-masternex-key" type="password" class="field-input" placeholder="MASTERNEX API Key / JWT (optional)" />
           <input id="inp-kdense-url" type="text" class="field-input" placeholder="K-Dense BYOK URL (http://127.0.0.1:8000)" />
           <input id="inp-gmaps-key" type="password" class="field-input" placeholder="Google Maps API Key (optional Street View/Geo)" />
+          <input id="inp-ws-url" type="text" class="field-input" placeholder="Wealth Symphony API URL (http://127.0.0.1:3001)" />
+          <input id="inp-ws-token" type="password" class="field-input" placeholder="Wealth Symphony Bearer JWT (in-memory only)" />
         </div>
         <div class="flex-row" style="justify-content:flex-end;padding-top:0.5rem">
           <button id="btn-cancel-dialog" type="button" class="btn-ghost btn-sm">Cancel</button>

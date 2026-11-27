@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>PropertyInsight AI — Dusk Edition (v6.0 Open-Source Spatial &amp; ECharts)</title>
+  <title>PropertyInsight AI — Precision Instrument (v6.0 Open-Source Spatial &amp; ECharts)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600&family=Wix+Madefor+Text:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- Open-Source MapLibre GL JS 5 (BSD-3-Clause, 3D Vector Buildings & Perspectives) -->
   <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
@@ -18,46 +18,54 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 
   <style>
-    /* Hallmark Dusk Theme Stamp — dusk: fog/periwinkle-apricot/glass */
+    /* Precision Instrument Theme — Chrome machined cards + white circuit-board (Tier B: --facet-*) */
     :root {
-      --color-paper: oklch(17.5% 0.014 268);
-      --color-paper-2: oklch(21% 0.016 268);
-      --color-paper-3: oklch(25% 0.017 268);
-      --color-ink: oklch(96% 0.006 75);
-      --color-ink-2: oklch(85% 0.010 262);
-      --color-muted: oklch(70% 0.016 262);
-      --color-rule: oklch(30% 0.016 266);
-      --color-light: oklch(100% 0 0);
-      --color-shade: oklch(10% 0.022 268);
-      --color-accent: oklch(77% 0.10 274);
-      --color-accent-ink: oklch(19% 0.035 274);
-      --color-accent-hi: oklch(84% 0.085 274);
-      --color-accent-deep: oklch(44% 0.13 274);
-      --color-accent-soft: oklch(91% 0.038 274);
-      --color-focus: oklch(80% 0.10 274);
-      --color-accent-2: oklch(83% 0.095 62);
-      --color-dusk: oklch(70% 0.12 330);
-      --color-ok: oklch(76% 0.11 160);
-      --color-day-ink: oklch(22% 0.022 268);
-      --color-day-muted: oklch(38% 0.022 266);
-      --color-fog: oklch(94% 0.012 70);
-      --color-well: oklch(95.5% 0.008 75);
-      --color-well-2: oklch(92% 0.010 75);
-      --color-well-ink: oklch(21% 0.016 268);
-      --color-well-muted: oklch(47% 0.016 265);
-      --color-well-rule: oklch(87.5% 0.009 75);
-      --color-card: oklch(99.5% 0.003 75);
-      --glass: oklch(22% 0.018 268 / 0.58);
-      --glass-blur: 22px;
-      --glass-hi: inset 0 1px 0 oklch(100% 0 0 / 0.10), inset 0 0 0 1px oklch(100% 0 0 / 0.06);
-      --shadow-card: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 40px 80px -32px oklch(8% 0.02 268 / 0.7);
-      --font-display: "Wix Madefor Display", ui-sans-serif, system-ui, sans-serif;
-      --font-body: "Wix Madefor Text", ui-sans-serif, system-ui, sans-serif;
-      --radius-card: 18px;
-      --radius-inner: 10px;
+      --color-paper: #F4F7F6;
+      --color-paper-2: #EAEFED;
+      --color-paper-3: #E0E8E5;
+      --color-ink: #141E24;
+      --color-ink-2: #2A3A44;
+      --color-muted: #4A5A66;
+      --color-rule: #C8D4D9;
+      --color-light: #FFFFFF;
+      --color-shade: #0A1824;
+      --color-accent: #0E6655;
+      --color-accent-ink: #FFFFFF;
+      --color-accent-hi: #12806A;
+      --color-accent-deep: #0A4D3D;
+      --color-accent-soft: #E0EDE9;
+      --color-focus: #0E6655;
+      --color-accent-2: #B34A00;
+      --color-dusk: #9B6A8A;
+      --color-ok: #0E6655;
+      --color-day-ink: #141E24;
+      --color-day-muted: #4A5A66;
+      --color-fog: #F4F7F6;
+      --color-well: #EEF2F5;
+      --color-well-2: #E6ECEF;
+      --color-well-ink: #141E24;
+      --color-well-muted: #4A5A66;
+      --color-well-rule: #C8D4D9;
+      --color-card: #FFFFFF;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+      --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --radius-card: 10px;
+      --radius-inner: 8px;
       --radius-pill: 999px;
-      --tracking-display: -0.022em;
-      --display-weight: 500;
+      --tracking-display: -0.018em;
+      --display-weight: 700;
+      /* Tier B Precision Instrument tokens */
+      --facet-color-bg: #F4F7F6;
+      --facet-color-card-from: #EEF2F5;
+      --facet-color-card-to: #E6ECEF;
+      --facet-color-slate: #141E24;
+      --facet-color-teal: #0E6655;
+      --facet-color-steel: #8A9AA4;
+      --facet-color-muted: #4A5A66;
+      --facet-color-white: #FFFFFF;
+      --facet-shadow-card: 0 1px 3px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -66,7 +74,9 @@
     html, body {
       margin: 0;
       overflow-x: hidden;
-      background: var(--color-paper);
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='none'/%3E%3Cpath d='M0 20 H13 M27 20 H40 M20 0 V13 M20 27 V40' stroke='%238A9AA4' stroke-width='0.5' opacity='0.35'/%3E%3Ccircle cx='20' cy='20' r='2.5' fill='none' stroke='%238A9AA4' stroke-width='0.5' opacity='0.3'/%3E%3Ccircle cx='0' cy='20' r='1' fill='%238A9AA4' opacity='0.22'/%3E%3Ccircle cx='40' cy='20' r='1' fill='%238A9AA4' opacity='0.22'/%3E%3Ccircle cx='20' cy='0' r='1' fill='%238A9AA4' opacity='0.22'/%3E%3Ccircle cx='20' cy='40' r='1' fill='%238A9AA4' opacity='0.22'/%3E%3C/svg%3E") repeat,
+        var(--color-paper);
       color: var(--color-ink);
       font-family: var(--font-body);
       font-size: 15px;
@@ -82,21 +92,24 @@
       line-height: 1.08;
     }
 
-    .num { font-family: var(--font-display); font-variant-numeric: tabular-nums; font-weight: 500; }
+    .num { font-family: var(--font-display); font-variant-numeric: tabular-nums; font-weight: 600; }
     .num .c { color: var(--color-muted); font-size: 0.62em; }
 
+    /* Chrome machined card — specular bevel top/left, steel shadow bottom/right */
     .glass {
-      background: var(--glass);
+      background: linear-gradient(160deg, var(--facet-color-card-from), var(--facet-color-card-to));
       border-radius: var(--radius-card);
-      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
-      backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
-      box-shadow: var(--glass-hi), var(--shadow-card);
+      border-top: 1px solid var(--facet-color-white);
+      border-left: 1px solid var(--facet-color-white);
+      border-right: 1px solid var(--facet-color-steel);
+      border-bottom: 1px solid var(--facet-color-steel);
+      box-shadow: var(--facet-shadow-card);
     }
 
     .inner-well {
-      background: oklch(100% 0 0 / 0.045);
+      background: rgba(255,255,255,0.65);
       border-radius: var(--radius-inner);
-      border: 1px solid oklch(100% 0 0 / 0.055);
+      border: 1px solid rgba(138,154,164,0.25);
     }
 
     .bone-well {
@@ -113,7 +126,7 @@
       border: 1px solid var(--color-well-rule);
     }
 
-    .row-rule { border-bottom: 1px solid oklch(100% 0 0 / 0.075); }
+    .row-rule { border-bottom: 1px solid rgba(0,0,0,0.07); }
 
     .btn-peri {
       min-height: 40px;
@@ -123,7 +136,7 @@
       background: var(--color-accent);
       color: var(--color-accent-ink);
       font: 600 0.84rem/1 var(--font-body);
-      box-shadow: inset 0 1px 0 color-mix(in oklab, var(--color-light) 35%, transparent);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
       cursor: pointer;
       transition: background 0.16s ease, box-shadow 0.16s ease;
       display: inline-flex;
@@ -134,7 +147,7 @@
     }
     .btn-peri:hover:not(:disabled) {
       background: var(--color-accent-hi);
-      box-shadow: 0 0 0 3px oklch(77% 0.10 274 / 0.22), inset 0 1px 0 color-mix(in oklab, var(--color-light) 35%, transparent);
+      box-shadow: 0 0 0 3px rgba(14,102,85,0.22), inset 0 1px 0 rgba(255,255,255,0.15);
     }
     .btn-peri:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -142,8 +155,8 @@
       min-height: 40px;
       padding: 0 15px;
       border-radius: var(--radius-pill);
-      background: oklch(100% 0 0 / 0.045);
-      border: 1px solid oklch(100% 0 0 / 0.10);
+      background: rgba(238,242,245,0.75);
+      border: 1px solid rgba(138,154,164,0.4);
       color: var(--color-ink);
       font: 500 0.84rem/1 var(--font-body);
       cursor: pointer;
@@ -154,7 +167,7 @@
       gap: 7px;
       white-space: nowrap;
     }
-    .btn-ghost:hover:not(:disabled) { background: oklch(100% 0 0 / 0.095); border-color: oklch(100% 0 0 / 0.18); }
+    .btn-ghost:hover:not(:disabled) { background: rgba(230,236,239,0.9); border-color: rgba(138,154,164,0.6); }
     .btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .dusk-tab {
@@ -190,10 +203,10 @@
       letter-spacing: 0.02em;
       text-transform: uppercase;
     }
-    .badge-acquire { background: color-mix(in oklab, var(--color-ok) 18%, transparent); color: var(--color-ok); border: 1px solid color-mix(in oklab, var(--color-ok) 36%, transparent); }
-    .badge-negotiate { background: color-mix(in oklab, var(--color-accent-2) 18%, transparent); color: var(--color-accent-2); border: 1px solid color-mix(in oklab, var(--color-accent-2) 38%, transparent); }
-    .badge-pass { background: color-mix(in oklab, var(--color-dusk) 18%, transparent); color: var(--color-dusk); border: 1px solid color-mix(in oklab, var(--color-dusk) 38%, transparent); }
-    .badge-peri { background: color-mix(in oklab, var(--color-accent) 16%, transparent); color: var(--color-accent); border: 1px solid color-mix(in oklab, var(--color-accent) 32%, transparent); }
+    .badge-acquire { background: rgba(14,102,85,0.1); color: var(--color-ok); border: 1px solid rgba(14,102,85,0.25); }
+    .badge-negotiate { background: rgba(179,74,0,0.1); color: var(--color-accent-2); border: 1px solid rgba(179,74,0,0.25); }
+    .badge-pass { background: rgba(155,106,138,0.1); color: var(--color-dusk); border: 1px solid rgba(155,106,138,0.25); }
+    .badge-peri { background: rgba(14,102,85,0.1); color: var(--color-accent); border: 1px solid rgba(14,102,85,0.22); }
 
     .amenity-pill {
       display: inline-flex;
@@ -203,17 +216,17 @@
       border-radius: var(--radius-pill);
       font-size: 0.74rem;
       font-weight: 500;
-      border: 1px solid oklch(100% 0 0 / 0.11);
-      background: oklch(100% 0 0 / 0.04);
+      border: 1px solid rgba(138,154,164,0.3);
+      background: rgba(255,255,255,0.5);
       color: var(--color-muted);
       cursor: pointer;
       transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
     }
-    .amenity-pill:hover { background: oklch(100% 0 0 / 0.08); color: var(--color-ink); }
-    .amenity-pill.active { background: oklch(100% 0 0 / 0.12); border-color: oklch(100% 0 0 / 0.28); color: var(--color-ink); }
+    .amenity-pill:hover { background: rgba(255,255,255,0.75); color: var(--color-ink); }
+    .amenity-pill.active { background: rgba(255,255,255,0.9); border-color: rgba(138,154,164,0.5); color: var(--color-ink); }
     .amenity-dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; flex-shrink: 0; }
 
-    .hero-photo { position: absolute; inset: -3%; width: 106%; height: 106%; object-fit: cover; animation: duskDrift 48s ease-in-out infinite alternate; }
+    .hero-photo { position: absolute; inset: -3%; width: 106%; height: 106%; object-fit: cover; animation: duskDrift 48s ease-in-out infinite alternate; filter: brightness(0.92) saturate(0.85); }
     @keyframes duskDrift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(-2%, -1.5%, 0) scale(1.04); } }
     @media (prefers-reduced-motion: reduce) { .hero-photo, .sig-apri { animation: none; } }
 
@@ -221,27 +234,27 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 52% 62% at 18% 52%, color-mix(in oklab, var(--color-fog) 78%, transparent), transparent 78%),
-        linear-gradient(to bottom, transparent 62%, var(--color-paper));
+        radial-gradient(ellipse 52% 62% at 18% 52%, rgba(244,247,246,0.88), transparent 78%),
+        linear-gradient(to bottom, transparent 60%, var(--color-paper));
     }
 
     .dusk-pin {
       width: 32px; height: 32px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
       font-family: var(--font-display); font-size: 12px; font-weight: 600; cursor: pointer;
-      box-shadow: 0 6px 18px oklch(10% 0.02 268 / 0.55); border: 2px solid var(--color-paper);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18); border: 2px solid #FFFFFF;
       transition: transform 0.16s ease, box-shadow 0.16s ease;
     }
-    .dusk-pin:hover, .dusk-pin.active { transform: scale(1.16); box-shadow: 0 0 0 4px oklch(77% 0.10 274 / 0.35), 0 8px 20px oklch(10% 0.02 268 / 0.7); }
+    .dusk-pin:hover, .dusk-pin.active { transform: scale(1.16); box-shadow: 0 0 0 4px rgba(14,102,85,0.25), 0 8px 20px rgba(0,0,0,0.22); }
     .maplibregl-popup-content, .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-      background: var(--color-paper-2) !important; color: var(--color-ink) !important;
+      background: #FFFFFF !important; color: var(--color-ink) !important;
       border: 1px solid var(--color-rule) !important; border-radius: 14px !important;
-      box-shadow: 0 18px 40px oklch(8% 0.02 268 / 0.75) !important; font-family: var(--font-body) !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; font-family: var(--font-body) !important;
     }
-    .leaflet-container { background: var(--color-paper-2) !important; font-family: var(--font-body) !important; }
+    .leaflet-container { background: var(--color-paper) !important; font-family: var(--font-body) !important; }
     .dusk-leaflet-icon { background: transparent !important; border: 0 !important; }
 
     dialog:modal { overscroll-behavior: contain; border: 0; padding: 0; background: transparent; color: var(--color-ink); max-width: 620px; width: calc(100% - 24px); margin: auto; }
-    dialog::backdrop { overflow: hidden; overscroll-behavior: contain; background: oklch(10% 0.022 268 / 0.75); backdrop-filter: blur(6px); }
+    dialog::backdrop { overflow: hidden; overscroll-behavior: contain; background: rgba(20,30,36,0.5); backdrop-filter: blur(6px); }
 
     input, select, textarea { font-size: 16px; }
     input[type="range"] { accent-color: var(--color-accent); }
@@ -256,7 +269,7 @@
 <body class="antialiased">
 
   <!-- SLATE GLASS STICKY NAVIGATION -->
-  <nav class="sticky top-0 z-30 border-b px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3" style="background: oklch(17.5% 0.014 268 / 0.85); backdrop-filter: blur(18px); border-color: var(--color-rule);">
+  <nav class="sticky top-0 z-30 border-b px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3" style="background: rgba(238,242,245,0.92); backdrop-filter: blur(12px); border-color: var(--color-rule);">
     <div class="flex items-center gap-3">
       <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style="background: var(--color-accent); color: var(--color-accent-ink);">PI</div>
       <div>
@@ -288,7 +301,7 @@
         </p>
         <div class="flex flex-wrap items-center gap-3 pt-1">
           <button id="btn-hero-audit" type="button" class="btn-peri">Generate IC Dossier</button>
-          <button id="btn-hero-map" type="button" class="btn-ghost" style="background: oklch(99% 0.005 75 / 0.80); color: var(--color-day-ink); border-color: oklch(22% 0.022 268 / 0.16)">Explore 3D Map</button>
+          <button id="btn-hero-map" type="button" class="btn-ghost" style="background: rgba(255,255,255,0.75); color: var(--color-day-ink); border-color: rgba(138,154,164,0.3)">Explore 3D Map</button>
         </div>
       </div>
 
@@ -475,13 +488,13 @@
       <div class="inner-well p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex flex-wrap items-center gap-2">
           <span class="font-medium mr-1" style="color: var(--color-ink-2)">Layers:</span>
-          <button id="toggle-layer-buildings" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #9ba8ff"></span>3D Buildings</button>
-          <button id="toggle-layer-rings" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #e5b887"></span>0.5/1/2mi Rings</button>
-          <button id="toggle-layer-heatmap" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #d87da0"></span>Yield Halo</button>
+          <button id="toggle-layer-buildings" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #0E6655"></span>3D Buildings</button>
+          <button id="toggle-layer-rings" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #8A9AA4"></span>0.5/1/2mi Rings</button>
+          <button id="toggle-layer-heatmap" type="button" class="amenity-pill active" aria-pressed="true"><span class="amenity-dot" style="background: #9B6A8A"></span>Yield Halo</button>
           <span class="mx-1 opacity-30">|</span>
-          <button id="toggle-amenity-schools" type="button" data-amenity-cat="schools" class="amenity-pill active"><span class="amenity-dot" style="background:#7da0ff"></span>Schools <span id="count-amenity-schools" class="num opacity-75">0</span></button>
-          <button id="toggle-amenity-transit" type="button" data-amenity-cat="transit" class="amenity-pill active"><span class="amenity-dot" style="background:#64d8b4"></span>Transit <span id="count-amenity-transit" class="num opacity-75">0</span></button>
-          <button id="toggle-amenity-retail" type="button" data-amenity-cat="retail" class="amenity-pill active"><span class="amenity-dot" style="background:#f2b872"></span>Retail <span id="count-amenity-retail" class="num opacity-75">0</span></button>
+          <button id="toggle-amenity-schools" type="button" data-amenity-cat="schools" class="amenity-pill active"><span class="amenity-dot" style="background:#12806A"></span>Schools <span id="count-amenity-schools" class="num opacity-75">0</span></button>
+          <button id="toggle-amenity-transit" type="button" data-amenity-cat="transit" class="amenity-pill active"><span class="amenity-dot" style="background:#0E6655"></span>Transit <span id="count-amenity-transit" class="num opacity-75">0</span></button>
+          <button id="toggle-amenity-retail" type="button" data-amenity-cat="retail" class="amenity-pill active"><span class="amenity-dot" style="background:#B34A00"></span>Retail <span id="count-amenity-retail" class="num opacity-75">0</span></button>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
@@ -615,7 +628,7 @@
 
   <!-- SETTINGS DIALOG -->
   <dialog id="settings-dialog" closedby="any" aria-labelledby="settings-title">
-    <div class="glass p-6 space-y-4 text-xs" style="background: oklch(19% 0.016 268 / 0.96);">
+    <div class="glass p-6 space-y-4 text-xs" style="background: rgba(238,242,245,0.97);">
       <div class="flex items-center justify-between pb-3 row-rule">
         <h2 id="settings-title" class="text-lg">Open-Source AI &amp; Frontier Providers</h2>
         <button id="btn-close-dialog" type="button" class="btn-ghost text-xs" style="min-height: 30px;">Close</button>
@@ -648,7 +661,7 @@
 
   <!-- ADD PROPERTY DIALOG -->
   <dialog id="add-property-dialog" closedby="any" aria-labelledby="add-prop-title">
-    <div class="glass p-6 space-y-4 text-xs" style="background: oklch(19% 0.016 268 / 0.96);">
+    <div class="glass p-6 space-y-4 text-xs" style="background: rgba(238,242,245,0.97);">
       <div class="flex items-center justify-between pb-3 row-rule">
         <h2 id="add-prop-title" class="text-lg">Add property row</h2>
         <button id="btn-close-add-prop" type="button" class="btn-ghost text-xs" style="min-height: 30px;">Close</button>
@@ -788,15 +801,15 @@
         if (c10) {
           c10.setOption({
             backgroundColor: 'transparent',
-            tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
-            legend: { data: ['Total Equity', 'Cumulative Cash Flow', 'Remaining Debt'], textStyle: { color: '#a8b0c8', fontSize: 11 }, top: 0 },
+            tooltip: { trigger: 'axis', backgroundColor: '#FFFFFF', borderColor: '#C8D4D9', textStyle: { color: '#141E24', fontSize: 12 } },
+            legend: { data: ['Total Equity', 'Cumulative Cash Flow', 'Remaining Debt'], textStyle: { color: '#4A5A66', fontSize: 11 }, top: 0 },
             grid: { left: 56, right: 16, top: 34, bottom: 24 },
-            xAxis: { type: 'category', data: m.years, axisLine: { lineStyle: { color: '#3f455e' } }, axisLabel: { color: '#9aa3bd', fontSize: 11 } },
-            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }, axisLabel: { color: '#9aa3bd', fontSize: 11, formatter: (v) => '$' + Math.round(v / 1000) + 'k' } },
+            xAxis: { type: 'category', data: m.years, axisLine: { lineStyle: { color: '#C8D4D9' } }, axisLabel: { color: '#4A5A66', fontSize: 11 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(0,0,0,0.06)' } }, axisLabel: { color: '#4A5A66', fontSize: 11, formatter: (v) => '$' + Math.round(v / 1000) + 'k' } },
             series: [
-              { name: 'Total Equity', type: 'line', smooth: true, data: m.equitySeries, lineStyle: { width: 2.5, color: '#9ba8ff' }, itemStyle: { color: '#9ba8ff' }, areaStyle: { color: 'rgba(155,168,255,0.16)' } },
-              { name: 'Cumulative Cash Flow', type: 'line', smooth: true, data: m.cfSeries, lineStyle: { width: 2.5, color: '#64d8b4' }, itemStyle: { color: '#64d8b4' }, areaStyle: { color: 'rgba(100,216,180,0.12)' } },
-              { name: 'Remaining Debt', type: 'line', smooth: true, data: m.debtSeries, lineStyle: { width: 1.8, type: 'dashed', color: '#f2b872' }, itemStyle: { color: '#f2b872' } }
+              { name: 'Total Equity', type: 'line', smooth: true, data: m.equitySeries, lineStyle: { width: 2.5, color: '#0E6655' }, itemStyle: { color: '#0E6655' }, areaStyle: { color: 'rgba(14,102,85,0.1)' } },
+              { name: 'Cumulative Cash Flow', type: 'line', smooth: true, data: m.cfSeries, lineStyle: { width: 2.5, color: '#12806A' }, itemStyle: { color: '#12806A' }, areaStyle: { color: 'rgba(18,128,106,0.08)' } },
+              { name: 'Remaining Debt', type: 'line', smooth: true, data: m.debtSeries, lineStyle: { width: 1.8, type: 'dashed', color: '#B34A00' }, itemStyle: { color: '#B34A00' } }
             ]
           });
         }
@@ -805,18 +818,18 @@
         if (cWf) {
           cWf.setOption({
             backgroundColor: 'transparent',
-            tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
+            tooltip: { trigger: 'axis', backgroundColor: '#FFFFFF', borderColor: '#C8D4D9', textStyle: { color: '#141E24', fontSize: 12 } },
             grid: { left: 50, right: 12, top: 18, bottom: 26 },
-            xAxis: { type: 'category', data: ['Gross', '-OpEx', 'NOI', '-Debt', 'Net CF'], axisLabel: { color: '#9aa3bd', fontSize: 11 } },
-            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }, axisLabel: { color: '#9aa3bd', fontSize: 10, formatter: (v) => '$' + Math.round(v) } },
+            xAxis: { type: 'category', data: ['Gross', '-OpEx', 'NOI', '-Debt', 'Net CF'], axisLabel: { color: '#4A5A66', fontSize: 11 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(0,0,0,0.06)' } }, axisLabel: { color: '#4A5A66', fontSize: 10, formatter: (v) => '$' + Math.round(v) } },
             series: [{
               type: 'bar', barWidth: '48%',
               data: [
-                { value: Math.round(m.grossMo), itemStyle: { color: '#9ba8ff', borderRadius: [4, 4, 0, 0] } },
-                { value: Math.round(-m.opexMo), itemStyle: { color: '#f2b872', borderRadius: [0, 0, 4, 4] } },
-                { value: Math.round(m.noiMo), itemStyle: { color: '#7da0ff', borderRadius: [4, 4, 0, 0] } },
-                { value: Math.round(-m.mDebt), itemStyle: { color: '#d87da0', borderRadius: [0, 0, 4, 4] } },
-                { value: Math.round(m.mCf), itemStyle: { color: m.mCf >= 0 ? '#64d8b4' : '#d87da0', borderRadius: [4, 4, 0, 0] } }
+                { value: Math.round(m.grossMo), itemStyle: { color: '#0E6655', borderRadius: [4, 4, 0, 0] } },
+                { value: Math.round(-m.opexMo), itemStyle: { color: '#B34A00', borderRadius: [0, 0, 4, 4] } },
+                { value: Math.round(m.noiMo), itemStyle: { color: '#12806A', borderRadius: [4, 4, 0, 0] } },
+                { value: Math.round(-m.mDebt), itemStyle: { color: '#9B6A8A', borderRadius: [0, 0, 4, 4] } },
+                { value: Math.round(m.mCf), itemStyle: { color: m.mCf >= 0 ? '#0E6655' : '#9B6A8A', borderRadius: [4, 4, 0, 0] } }
               ]
             }]
           });
@@ -827,14 +840,14 @@
           const days = Array.from({ length: 30 }, (_, i) => `N${i + 1}`);
           const vals = days.map((_, d) => ({
             value: Math.round((m.mCf / 30 + 60) * (0.7 + 0.3 * Math.sin(d * 0.5))),
-            itemStyle: { color: d === 22 ? '#f2b872' : d >= 26 ? 'rgba(255,255,255,0.16)' : '#9ba8ff', borderRadius: [4, 4, 0, 0] }
+            itemStyle: { color: d === 22 ? '#B34A00' : d >= 26 ? 'rgba(138,154,164,0.25)' : '#0E6655', borderRadius: [4, 4, 0, 0] }
           }));
           cNi.setOption({
             backgroundColor: 'transparent',
-            tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
+            tooltip: { trigger: 'axis', backgroundColor: '#FFFFFF', borderColor: '#C8D4D9', textStyle: { color: '#141E24', fontSize: 12 } },
             grid: { left: 38, right: 8, top: 14, bottom: 22 },
-            xAxis: { type: 'category', data: days, axisLabel: { color: '#9aa3bd', fontSize: 9, interval: 4 } },
-            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }, axisLabel: { color: '#9aa3bd', fontSize: 10 } },
+            xAxis: { type: 'category', data: days, axisLabel: { color: '#4A5A66', fontSize: 9, interval: 4 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(0,0,0,0.06)' } }, axisLabel: { color: '#4A5A66', fontSize: 10 } },
             series: [{ type: 'bar', data: vals }]
           });
         }
@@ -878,13 +891,13 @@
                 { name: 'DSCR', max: 100 }, { name: 'Spread', max: 100 }, { name: 'CoC', max: 100 },
                 { name: '2³ DOE', max: 100 }, { name: 'CapEx', max: 100 }, { name: 'OSM Loc', max: 100 }
               ],
-              splitArea: { areaStyle: { color: ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.04)'] } },
-              axisName: { color: '#a8b0c8', fontSize: 11 },
-              splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
+              splitArea: { areaStyle: { color: ['rgba(0,0,0,0.02)', 'rgba(0,0,0,0.04)'] } },
+              axisName: { color: '#4A5A66', fontSize: 11 },
+              splitLine: { lineStyle: { color: 'rgba(0,0,0,0.08)' } }
             },
             series: [{
               type: 'radar',
-              data: [{ value: [Math.round(sDscr), Math.round(sSpread), Math.round(sCoc), Math.round(sDoe), Math.round(sRehab), sLoc], areaStyle: { color: 'rgba(155,168,255,0.28)' }, lineStyle: { color: '#9ba8ff', width: 2 }, itemStyle: { color: '#9ba8ff' } }]
+              data: [{ value: [Math.round(sDscr), Math.round(sSpread), Math.round(sCoc), Math.round(sDoe), Math.round(sRehab), sLoc], areaStyle: { color: 'rgba(14,102,85,0.18)' }, lineStyle: { color: '#0E6655', width: 2 }, itemStyle: { color: '#0E6655' } }]
             }]
           });
         }
@@ -893,14 +906,14 @@
         if (cDoe) {
           cDoe.setOption({
             backgroundColor: 'transparent',
-            tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
+            tooltip: { trigger: 'axis', backgroundColor: '#FFFFFF', borderColor: '#C8D4D9', textStyle: { color: '#141E24', fontSize: 12 } },
             grid: { left: 40, right: 12, top: 18, bottom: 26 },
-            xAxis: { type: 'category', data: doe.runs.map((r) => `R${r.id} (${r.rate}%)`), axisLabel: { color: '#9aa3bd', fontSize: 10 } },
-            yAxis: { type: 'value', min: 0.6, axisLabel: { color: '#9aa3bd', fontSize: 10, formatter: (v) => v.toFixed(1) + 'x' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } } },
+            xAxis: { type: 'category', data: doe.runs.map((r) => `R${r.id} (${r.rate}%)`), axisLabel: { color: '#4A5A66', fontSize: 10 } },
+            yAxis: { type: 'value', min: 0.6, axisLabel: { color: '#4A5A66', fontSize: 10, formatter: (v) => v.toFixed(1) + 'x' }, splitLine: { lineStyle: { color: 'rgba(0,0,0,0.06)' } } },
             series: [{
               type: 'bar', barWidth: '48%',
-              data: doe.runs.map((r) => ({ value: Number(r.dscr.toFixed(2)), itemStyle: { color: r.passed ? '#64d8b4' : '#f2b872', borderRadius: [4, 4, 0, 0] } })),
-              markLine: { data: [{ yAxis: 1.20 }], lineStyle: { color: '#9ba8ff', type: 'dashed' } }
+              data: doe.runs.map((r) => ({ value: Number(r.dscr.toFixed(2)), itemStyle: { color: r.passed ? '#0E6655' : '#B34A00', borderRadius: [4, 4, 0, 0] } })),
+              markLine: { data: [{ yAxis: 1.20 }], lineStyle: { color: '#8A9AA4', type: 'dashed' } }
             }]
           });
         }
@@ -924,15 +937,15 @@
         if (!cMn) return;
         cMn.setOption({
           backgroundColor: 'transparent',
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: '#1f2230', borderColor: '#3f455e', textStyle: { color: '#f4f2ec', fontSize: 12 } },
-          legend: { data: ['NADE (bps)', 'GIE (bps)', 'BNE (bps)'], textStyle: { color: '#a8b0c8', fontSize: 11 }, top: 0 },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: '#FFFFFF', borderColor: '#C8D4D9', textStyle: { color: '#141E24', fontSize: 12 } },
+          legend: { data: ['NADE (bps)', 'GIE (bps)', 'BNE (bps)'], textStyle: { color: '#4A5A66', fontSize: 11 }, top: 0 },
           grid: { left: 50, right: 12, top: 32, bottom: 24 },
-          xAxis: { type: 'category', data: MASTERNEX_DECISIONS.map((d) => d.label), axisLabel: { color: '#9aa3bd', fontSize: 10 } },
-          yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }, axisLabel: { color: '#9aa3bd', fontSize: 10 } },
+          xAxis: { type: 'category', data: MASTERNEX_DECISIONS.map((d) => d.label), axisLabel: { color: '#4A5A66', fontSize: 10 } },
+          yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(0,0,0,0.06)' } }, axisLabel: { color: '#4A5A66', fontSize: 10 } },
           series: [
-            { name: 'NADE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.nade), itemStyle: { color: '#9ba8ff' } },
-            { name: 'GIE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.gie), itemStyle: { color: '#64d8b4' } },
-            { name: 'BNE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.bne), itemStyle: { color: '#f2b872' } }
+            { name: 'NADE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.nade), itemStyle: { color: '#0E6655' } },
+            { name: 'GIE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.gie), itemStyle: { color: '#12806A' } },
+            { name: 'BNE (bps)', type: 'bar', stack: 'total', data: MASTERNEX_DECISIONS.map((d) => d.bne), itemStyle: { color: '#B34A00' } }
           ]
         });
         const elMn = document.getElementById('explain-masternex');
@@ -957,20 +970,20 @@
           state.leafletOverlayGroup.clearLayers();
           if (state.layers.rings) {
             [800, 1600, 3200].forEach((r, idx) => {
-              L.circle([lat, lng], { radius: r, color: idx === 1 ? '#9ba8ff' : '#a8b0c8', weight: idx === 1 ? 1.8 : 1, dashArray: '5,4', fillOpacity: idx === 0 ? 0.08 : 0.02 }).addTo(state.leafletOverlayGroup);
+              L.circle([lat, lng], { radius: r, color: idx === 1 ? '#0E6655' : '#8A9AA4', weight: idx === 1 ? 1.8 : 1, dashArray: '5,4', fillOpacity: idx === 0 ? 0.08 : 0.02 }).addTo(state.leafletOverlayGroup);
             });
           }
           if (state.layers.heatmap) {
             state.properties.forEach((prop) => {
               const uw = calcUW(prop);
-              L.circle([prop.lat, prop.lng], { radius: 950, stroke: false, fillColor: uw.capRate >= 7 ? '#64d8b4' : '#f2b872', fillOpacity: 0.22 }).addTo(state.leafletOverlayGroup);
+              L.circle([prop.lat, prop.lng], { radius: 950, stroke: false, fillColor: uw.capRate >= 7 ? '#12806A' : '#B34A00', fillOpacity: 0.22 }).addTo(state.leafletOverlayGroup);
             });
           }
           if (audit) {
             audit.features.filter((f) => state.amenities.visible[f.properties.category]).forEach((f) => {
               const [fLng, fLat] = f.geometry.coordinates;
-              const col = f.properties.category === 'schools' ? '#7da0ff' : f.properties.category === 'transit' ? '#64d8b4' : '#f2b872';
-              L.circleMarker([fLat, fLng], { radius: 6, color: '#181a24', weight: 1.5, fillColor: col, fillOpacity: 0.94 })
+              const col = f.properties.category === 'schools' ? '#12806A' : f.properties.category === 'transit' ? '#0E6655' : '#B34A00';
+              L.circleMarker([fLat, fLng], { radius: 6, color: '#8A9AA4', weight: 1.5, fillColor: col, fillOpacity: 0.94 })
                 .bindPopup(`<strong>${escHtml(f.properties.name)}</strong><br/>${escHtml(f.properties.subtype)} · ${f.properties.distanceMi} mi`).addTo(state.leafletOverlayGroup);
             });
           }
@@ -1013,7 +1026,7 @@
           if (map.getSource('pi-rings')) map.getSource('pi-rings').setData(ringGeo);
           else {
             map.addSource('pi-rings', { type: 'geojson', data: ringGeo });
-            map.addLayer({ id: 'pi-rings-line', type: 'line', source: 'pi-rings', paint: { 'line-color': '#9ba8ff', 'line-width': 1.5, 'line-dasharray': [4, 3], 'line-opacity': 0.75 } });
+            map.addLayer({ id: 'pi-rings-line', type: 'line', source: 'pi-rings', paint: { 'line-color': '#0E6655', 'line-width': 1.5, 'line-dasharray': [4, 3], 'line-opacity': 0.75 } });
           }
 
           // Yield Heatmap Layer
@@ -1026,7 +1039,7 @@
             map.addSource('pi-heat', { type: 'geojson', data: heatGeo });
             map.addLayer({
               id: 'pi-heat-layer', type: 'heatmap', source: 'pi-heat',
-              paint: { 'heatmap-weight': ['interpolate', ['linear'], ['get', 'cap'], 4, 0.3, 10, 1], 'heatmap-radius': 48, 'heatmap-opacity': 0.55, 'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'], 0, 'rgba(0,0,0,0)', 0.4, '#9ba8ff', 0.8, '#64d8b4', 1, '#f2b872'] }
+              paint: { 'heatmap-weight': ['interpolate', ['linear'], ['get', 'cap'], 4, 0.3, 10, 1], 'heatmap-radius': 48, 'heatmap-opacity': 0.55, 'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'], 0, 'rgba(0,0,0,0)', 0.4, '#0E6655', 0.8, '#12806A', 1, '#B34A00'] }
             });
           }
 
@@ -1035,7 +1048,7 @@
           if (map.getSource('pi-pois')) map.getSource('pi-pois').setData(poiGeo);
           else {
             map.addSource('pi-pois', { type: 'geojson', data: poiGeo });
-            map.addLayer({ id: 'pi-pois-circle', type: 'circle', source: 'pi-pois', paint: { 'circle-radius': 6, 'circle-color': ['match', ['get', 'category'], 'schools', '#7da0ff', 'transit', '#64d8b4', 'retail', '#f2b872', '#fff'], 'circle-stroke-width': 1.5, 'circle-stroke-color': '#181a24' } });
+            map.addLayer({ id: 'pi-pois-circle', type: 'circle', source: 'pi-pois', paint: { 'circle-radius': 6, 'circle-color': ['match', ['get', 'category'], 'schools', '#12806A', 'transit', '#0E6655', 'retail', '#B34A00', '#8A9AA4'], 'circle-stroke-width': 1.5, 'circle-stroke-color': '#8A9AA4' } });
           }
         }
       }

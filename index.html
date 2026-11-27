@@ -276,7 +276,7 @@
         <span class="font-medium text-sm tracking-tight" style="font-family: var(--font-display)">PropertyInsight</span>
         <span class="text-xs ml-2 hidden sm:inline" style="color: var(--color-muted)">v6.0 · Open-Source Spatial &amp; ECharts</span>
       </div>
-      <span id="nav-provider-pill" class="hidden sm:inline-flex badge badge-peri ml-2">Pollinations OSS (Free)</span>
+      <span id="nav-provider-pill" class="hidden sm:inline-flex badge badge-peri ml-2">Quant Engine (Local)</span>
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
@@ -540,7 +540,7 @@
           <button type="button" data-report-type="cma" class="report-trigger btn-ghost text-xs">Portfolio CMA</button>
           <button type="button" data-report-type="lp_memo" class="report-trigger btn-ghost text-xs">LP Brief</button>
         </div>
-        <span class="text-xs" style="color: var(--color-muted)">Engine: <strong id="report-engine-badge" style="color: var(--color-accent)">Pollinations OSS</strong></span>
+        <span class="text-xs" style="color: var(--color-muted)">Engine: <strong id="report-engine-badge" style="color: var(--color-accent)">Quant Engine (Local)</strong></span>
       </div>
 
       <form id="report-custom-form" class="glass p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
@@ -722,9 +722,9 @@
       ];
 
       let state = {
-        provider: 'pollinations',
-        baseUrl: PROVIDER_PRESETS.pollinations.url,
-        modelId: 'openai',
+        provider: 'quant',
+        baseUrl: PROVIDER_PRESETS.quant.url,
+        modelId: 'deterministic-pe-v6',
         apiKey: '',
         mapStyle: 'fiord',
         mapEngine: 'maplibre',

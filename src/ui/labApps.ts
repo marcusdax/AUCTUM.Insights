@@ -24,6 +24,12 @@ import {
   summarizeHFStream,
 } from '../engine/optimizer';
 import {
+  DEFAULT_WATERFALL_TERMS,
+  type WaterfallTerms,
+  computeSyndicationWaterfall,
+  waterfallToCSV,
+} from '../engine/waterfall';
+import {
   type AcademicPaper,
   type MasternexConfig,
   runMasternexStormHazard,
@@ -46,7 +52,8 @@ export type LabAppId =
   | 'scientific-writing'
   | 'hf-datasets'
   | 'literature-search'
-  | 'portfolio-optimizer';
+  | 'portfolio-optimizer'
+  | 'syndication-waterfall';
 
 interface LabAppDef {
   id: LabAppId;
@@ -104,6 +111,12 @@ export const LAB_APPS: LabAppDef[] = [
     title: 'Portfolio Optimizer & Frontier App',
     subtitle: 'Budget Knapsack · Cash Flow / IRR / DSCR Objective',
   },
+  {
+    id: 'syndication-waterfall',
+    badge: 'LP / GP Waterfall',
+    title: 'Syndication Equity Waterfall App',
+    subtitle: 'Pref Hurdle · GP Promote · Fees · LP/GP IRR',
+  },
 ];
 
 export interface LabCallbacks {
@@ -147,6 +160,9 @@ export class LabAppsController {
   // Portfolio Capital Optimizer state
   private optBudget = 250000;
   private optObjective: AllocationObjective = 'cashflow';
+
+  // LP/GP Syndication Waterfall state
+  private wfTerms: WaterfallTerms = { ...DEFAULT_WATERFALL_TERMS };
 
   constructor(private cb: LabCallbacks) {}
 
@@ -216,6 +232,8 @@ export class LabAppsController {
       this.renderLiteratureWorkbench(stageEl);
     } else if (this.activeApp === 'portfolio-optimizer') {
       this.renderPortfolioOptimizer(stageEl, strat);
+    } else if (this.activeApp === 'syndication-waterfall') {
+      this.renderSyndicationWaterfall(stageEl, p, strat);
     }
   }
 
@@ -947,6 +965,95 @@ export class LabAppsController {
     document.getElementById('lab-opt-export')?.addEventListener('click', () => {
       this.downloadText('AUCTUM_Capital_Allocation_Plan.json', JSON.stringify(res, null, 2), 'application/json');
       this.cb.showToast('Exported Capital Allocation Plan JSON');
+    });
+  }
+
+  private renderSyndicationWaterfall(
+    el: HTMLElement,
+    p: PropertyParcel,
+    strat: UnderwritingStrategy
+  ): void {
+    const wf = computeSyndicationWaterfall(p, strat, this.wfTerms);
+
+    el.innerHTML = `
+      <div class="stack-sm">
+        <div class="flex-between row-rule" style="padding-bottom:0.65rem">
+          <div>
+            <span class="badge badge-peri">2-Tier Institutional LP / GP Waterfall</span>
+            <h3 style="margin-top:4px">Syndication Equity Waterfall — ${escHtml(p.address)}</h3>
+            <p class="text-xs text-muted">Total Equity ${fmtDollars(wf.totalEquityRequired)} (LP ${fmtDollars(wf.lpEquityIn)} · GP ${fmtDollars(wf.gpEquityIn)}) · Acq Fee ${fmtDollars(wf.acqFee)}</p>
+          </div>
+          <div class="flex-row">
+            <button id="lab-wf-csv" type="button" class="btn-ghost btn-sm">Export CSV</button>
+            <button id="lab-wf-json" type="button" class="btn-peri btn-sm">Export JSON</button>
+          </div>
+        </div>
+
+        <div class="grid-3 text-xs">
+          <label class="inner-well pad-well">
+            <div class="flex-between text-muted"><span>LP Equity Share</span><strong class="num text-accent">${this.wfTerms.lpEquityPct}% / ${100 - this.wfTerms.lpEquityPct}% GP</strong></div>
+            <input id="lab-wf-lp" type="range" min="60" max="95" step="5" value="${this.wfTerms.lpEquityPct}" style="margin-top:8px" />
+          </label>
+          <label class="inner-well pad-well">
+            <div class="flex-between text-muted"><span>LP Pref Hurdle</span><strong class="num text-ok">${this.wfTerms.prefRatePct.toFixed(1)}%</strong></div>
+            <input id="lab-wf-pref" type="range" min="5" max="12" step="0.5" value="${this.wfTerms.prefRatePct}" style="margin-top:8px" />
+          </label>
+          <label class="inner-well pad-well">
+            <div class="flex-between text-muted"><span>GP Promote Split</span><strong class="num text-apri">${this.wfTerms.promoteSplitGpPct}% GP</strong></div>
+            <input id="lab-wf-prom" type="range" min="15" max="50" step="5" value="${this.wfTerms.promoteSplitGpPct}" style="margin-top:8px" />
+          </label>
+        </div>
+
+        <div class="grid-4">
+          <div class="inner-well pad-well"><div class="text-xs text-muted">LP IRR / EM</div><div class="num text-xl text-ok">${wf.lpIrr.toFixed(1)}% <span class="c">/ ${wf.lpEquityMultiple.toFixed(2)}x</span></div></div>
+          <div class="inner-well pad-well"><div class="text-xs text-muted">GP IRR / EM</div><div class="num text-xl text-accent">${wf.gpIrr.toFixed(1)}% <span class="c">/ ${wf.gpEquityMultiple.toFixed(2)}x</span></div></div>
+          <div class="inner-well pad-well"><div class="text-xs text-muted">LP Total Cash</div><div class="num text-xl">${fmtDollars(wf.lpTotalDistributions)}</div></div>
+          <div class="inner-well pad-well"><div class="text-xs text-muted">GP Promote + Fees</div><div class="num text-xl text-apri">${fmtDollars(wf.gpPromoteEarned + wf.acqFee + wf.totalAmFees)}</div></div>
+        </div>
+
+        <div class="inner-well pad-well">
+          <div class="text-xs text-muted" style="margin-bottom:4px">10-Year LP vs. GP Distribution Schedule (Incl. Year-10 Exit)</div>
+          <div id="echart-lab-wf" style="width:100%;height:215px"></div>
+        </div>
+      </div>`;
+
+    const wfEl = document.getElementById('echart-lab-wf');
+    if (wfEl) {
+      const c = echarts.init(wfEl);
+      c.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: '#1f2230', borderColor: '#3a3f54', textStyle: { color: '#f3f2ee', fontSize: 11 } },
+        legend: { top: 0, textStyle: { color: '#b4b8cc', fontSize: 11 } },
+        grid: { left: 56, right: 16, top: 30, bottom: 26 },
+        xAxis: { type: 'category', data: wf.schedule.map((r) => `Yr ${r.year}`), axisLabel: { color: '#9ca1b8', fontSize: 10 } },
+        yAxis: { type: 'value', axisLabel: { color: '#9ca1b8', fontSize: 10, formatter: (v: number) => `$${Math.round(v / 1000)}k` }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } } },
+        series: [
+          { name: 'LP Distribution', type: 'bar', stack: 'dist', data: wf.schedule.map((r) => r.lpDistribution), itemStyle: { color: '#6fd4aa' } },
+          { name: 'GP Distribution', type: 'bar', stack: 'dist', data: wf.schedule.map((r) => r.gpDistribution), itemStyle: { color: '#9ba8ff' } },
+          { name: 'AM Fee', type: 'bar', stack: 'dist', data: wf.schedule.map((r) => r.amFee), itemStyle: { color: '#e5b887' } },
+        ],
+      });
+    }
+
+    document.getElementById('lab-wf-lp')?.addEventListener('input', (e) => {
+      this.wfTerms.lpEquityPct = Number((e.target as HTMLInputElement).value);
+      this.render();
+    });
+    document.getElementById('lab-wf-pref')?.addEventListener('input', (e) => {
+      this.wfTerms.prefRatePct = Number((e.target as HTMLInputElement).value);
+      this.render();
+    });
+    document.getElementById('lab-wf-prom')?.addEventListener('input', (e) => {
+      this.wfTerms.promoteSplitGpPct = Number((e.target as HTMLInputElement).value);
+      this.render();
+    });
+    document.getElementById('lab-wf-csv')?.addEventListener('click', () => {
+      this.downloadText('AUCTUM_Syndication_Waterfall.csv', waterfallToCSV(wf), 'text/csv');
+      this.cb.showToast('Exported LP/GP Waterfall CSV');
+    });
+    document.getElementById('lab-wf-json')?.addEventListener('click', () => {
+      this.downloadText('AUCTUM_Syndication_Waterfall.json', JSON.stringify(wf, null, 2), 'application/json');
+      this.cb.showToast('Exported LP/GP Waterfall JSON');
     });
   }
 }

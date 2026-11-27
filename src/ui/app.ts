@@ -1519,6 +1519,91 @@ export function initApp(): void {
     showToast(`Theme switched to ${next === 'daylight' ? 'Daylight Editorial' : 'Hallmark Dusk'}`);
   });
 
+  // Saved Scenario Snapshots (Save / Restore / Delete)
+  interface ScenarioSnapshot {
+    id: string;
+    label: string;
+    strategy: UnderwritingStrategy;
+    parcel: PropertyParcel;
+    dscr: number;
+    irr10Yr: number;
+  }
+  const SNAP_KEY = 'auctum_snapshots_v75';
+  const loadSnapshots = (): ScenarioSnapshot[] => {
+    try {
+      const raw = localStorage.getItem(SNAP_KEY);
+      return raw ? (JSON.parse(raw) as ScenarioSnapshot[]) : [];
+    } catch {
+      return [];
+    }
+  };
+  let snapshots = loadSnapshots();
+  const saveSnapshots = () => {
+    try {
+      localStorage.setItem(SNAP_KEY, JSON.stringify(snapshots.slice(0, 8)));
+    } catch {
+      // ignore
+    }
+  };
+  const renderSnapshots = () => {
+    const box = document.getElementById('snapshot-chips');
+    if (!box) return;
+    if (!snapshots.length) {
+      box.innerHTML = '<span class="text-muted">No snapshots saved yet. Click "+ Save Snapshot" to bookmark current assumptions.</span>';
+      return;
+    }
+    box.innerHTML = snapshots
+      .map(
+        (s, idx) => `<div class="inner-well flex-row" style="padding:4px 10px;gap:6px">
+          <button type="button" data-snap-load="${idx}" class="row-icon-btn" style="color:var(--color-ink);font-weight:500">${escHtml(
+            s.label
+          )} · <span class="text-accent">${s.dscr.toFixed(2)}x</span> / <span class="text-ok">${s.irr10Yr.toFixed(
+            1
+          )}%</span></button>
+          <button type="button" data-snap-del="${idx}" class="row-icon-btn" title="Delete snapshot">✕</button>
+        </div>`
+      )
+      .join('');
+
+    box.querySelectorAll<HTMLButtonElement>('[data-snap-load]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const snap = snapshots[Number(b.dataset.snapLoad)];
+        if (!snap) return;
+        state.activeStrategy = snap.strategy;
+        state.properties[state.activeIndex] = { ...snap.parcel, id: getActiveParcel().id };
+        state.lastAttribution = null;
+        saveState();
+        syncUWInputs();
+        renderAll();
+        showToast(`Restored snapshot: ${snap.label}`);
+      })
+    );
+    box.querySelectorAll<HTMLButtonElement>('[data-snap-del]').forEach((b) =>
+      b.addEventListener('click', () => {
+        snapshots.splice(Number(b.dataset.snapDel), 1);
+        saveSnapshots();
+        renderSnapshots();
+      })
+    );
+  };
+  document.getElementById('btn-save-snapshot')?.addEventListener('click', () => {
+    const p = getActiveParcel();
+    const m = calcUnderwriting(p, state.activeStrategy);
+    snapshots.unshift({
+      id: `snap-${Date.now()}`,
+      label: `${state.activeStrategy.toUpperCase()} @ ${fmtDollars(p.price)} (${p.rate.toFixed(2)}%)`,
+      strategy: state.activeStrategy,
+      parcel: JSON.parse(JSON.stringify(p)),
+      dscr: m.dscr,
+      irr10Yr: m.irr10Yr,
+    });
+    snapshots = snapshots.slice(0, 8);
+    saveSnapshots();
+    renderSnapshots();
+    showToast('Saved scenario snapshot');
+  });
+  renderSnapshots();
+
   window.addEventListener('resize', () => charts.resizeAll());
 
   syncUWInputs();

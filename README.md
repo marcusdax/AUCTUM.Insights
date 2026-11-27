@@ -1,29 +1,38 @@
-# AUCTUM.Insights
+# AUCTUM.Insights (v7.4)
 
-**PropertyInsight AI — Hallmark Dusk Edition**
+**Sovereign Real Estate Underwriting, Experimental Design, Spatial Intelligence & Fiduciary Decision Platform** — *Hallmark Dusk & Daylight Editorial Editions*
 
-A standalone, zero-backend-required real estate underwriting, spatial intelligence, and AI decisioning dashboard built with:
+Part of the **MASTERNEX.os Ecosystem** (Bucket 4 — Fiduciary & Decision Intelligence · `lora_fiduciary`). Runs **100% static / zero-backend-required** in any modern browser or GitHub Pages deployment, or as a **full-stack Docker Compose deployment** paired with live **MASTERNEX.os**, **K-Dense BYOK**, **Hugging Face Hub**, and **Google Maps Platform**.
 
-- **Hallmark Dusk UI** (`fog / periwinkle-apricot / glass`) — responsive desktop & mobile layout
-- **Open-Source Spatial Stack** — MapLibre GL JS with Carto Dark / OpenTopo / Esri Satellite layers, 3D building extrusions, cap-rate heatmap, 0.5mi / 1mi / 3mi trade-area rings, and live Overpass API amenity & transit POI scanning
-- **Apache ECharts Suite** — 10-year equity & cash-flow trajectory, monthly NOI-to-net waterfall, 30-night occupancy cushion, 6-pillar underwriting radar, 2³ factorial DOE stress test, and MasterNex basis-point attribution (NADE / GIE / BNE) with dynamic analytical explanations
-- **Multi-Provider AI Report Studio** — Pollinations OSS (free, zero-key), Anthropic Claude, Google Gemini, Ollama / OpenAI-compatible endpoints, and deterministic Quant fallback, with Markdown-to-HTML dossier formatting for **IC Audit**, **Negotiation**, **Portfolio CMA**, and **LP Brief**
-- **AG-UI 1.0 Event Stream** — live agentic telemetry and decision trace
+## Highlights in v7.4
 
-## Quick Start
+- **5 Adaptive User Personas**: Switch instantaneously between **Institutional PE / IC**, **Broker / Acquisition**, **Fiduciary / Wealth Advisor (SR 11-7)**, **Storm & Risk Underwriter (`AUCTUM.atlas`)**, and **Retail / House-Hacker / STR**.
+- **Institutional Underwriting & Financing Studio**: 10-year **Levered IRR** (Newton-Raphson), **Equity Multiple**, **Break-Even Occupancy %**, **BRRRR 75% LTV Refi Recapture**, **Interactive Target-Price Solver** (selectable DSCR/Cap/CoC target + 1-click Apply), **2-1 Rate Buydown & Seller Credit Calculator**, **27.5-Yr Depreciation Tax Shield**, **Portfolio Comparison Matrix**, CSV import/export, **Shareable `#deal=` URLs**, and **Print/PDF Executive Tear-Sheet**.
+- **8-App Scientific Apps Lab**:
+  1. **Experimental Design Lab** (`/skill:experimental-design`): Live ECharts Power Curve, sample-size calculator ($\alpha$, $1-\beta$, Cohen's $d$), and 2³ orthogonal DOE main/interaction effects.
+  2. **MASTERNEX Verification App** (`/skill:masternex-scientific`): 5-point honest-by-construction audit contract, live ACP-SQL / `ML-DSA-87` seal, and Auditor Pack JSON export.
+  3. **Econometrics & Tail-Risk Lab** (`/skill:statistical-analysis`): Portfolio OLS scatter + fit line ($R^2$, RMSE) and 95%/99% VaR & CVaR annual cash-flow shortfall.
+  4. **Geospatial & Huff Gravity App** (`/skill:geospatial-analysis`): Adjustable distance-decay ($\beta$) gravity model, H3 cell, Overpass POI scan, and `AUCTUM.atlas` storm exposure.
+  5. **Scientific Writing & LaTeX Studio** (`/skill:scientific-writing`): Publication-ready `.tex` (`booktabs`) and `.md` dossiers with auto-injected bibliography.
+  6. **HF Datasets Benchmark Workbench**: Stream any public Hugging Face dataset (`datasets-server.huggingface.co/rows`) with pagination, keyword filter, automatic sentiment/keyword analytics, and CSV export.
+  7. **Peer-Reviewed Literature Workbench**: Live Nature / OpenAlex / arXiv search, **Cite in Paper** Bibliography Cart, and `.bib` BibTeX export.
+  8. **Portfolio Capital Allocator**: Exact 0/1 budget-constrained portfolio optimizer maximizing Cash Flow, Levered IRR, or Risk-Adjusted (`DSCR × IRR`) return.
+- **Global `⌘K` / `Ctrl+K` Command Palette** & **Dusk ☾ / Daylight ☀** WCAG 2.2 AA theme switcher.
 
-Open `index.html` directly in any browser, or serve locally:
+## Quick Start (Local Vite)
 
 ```bash
-python -m http.server 8765
+npm install
+npm run dev        # local dev server at http://localhost:4173
+npm run typecheck  # strict TypeScript check
+npm test           # Vitest suite (27 specs across 7 files)
+npm run build      # static production bundle in dist/
 ```
 
-Then visit `http://127.0.0.1:8765/`.
+## Full-Stack Docker Compose (AUCTUM.Insights + MASTERNEX.os)
 
-## Repository Contents
-
-- `index.html` — Primary dashboard entry point (mirrors `property_insight_ai_dashboard.html`)
-- `property_insight_ai_dashboard.html` — Full standalone dashboard source
-- `property_underwriting_widget.html` — Compact interactive underwriting widget
-- `property_insight_portfolio_analytics.ipynb` — Portfolio analytics & DOE modeling notebook
-- `property_insight_architecture_pack.md` — System architecture & specification notes
+```bash
+docker compose up -d --build
+# Frontend + Nginx reverse proxy: http://127.0.0.1:8088
+# MASTERNEX.os API (proxied at /api/masternex): http://127.0.0.1:8080
+```

@@ -1,0 +1,28 @@
+services:
+  masternex:
+    build:
+      context: ../MASTERNEX.os
+      dockerfile: Dockerfile
+    container_name: auctum-masternex
+    ports:
+      - "8080:8080"
+    environment:
+      MASTERNEX_ENV: development
+      MASTERNEX_JWT_SECRET: ${MASTERNEX_JWT_SECRET:-auctum-dev-jwt-secret-change-in-prod-32bytes}
+    volumes:
+      - masternex-data:/data
+    restart: unless-stopped
+
+  auctum-insights:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auctum-insights-web
+    ports:
+      - "8088:80"
+    depends_on:
+      - masternex
+    restart: unless-stopped
+
+volumes:
+  masternex-data:

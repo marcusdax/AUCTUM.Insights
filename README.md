@@ -1,38 +1,38 @@
-# AUCTUM.Insights (v7.0)
+# AUCTUM.Insights (v7.4)
 
-**Sovereign Real Estate Underwriting, Experimental Design, Spatial Intelligence & Fiduciary Decision Platform** — *Hallmark Dusk Edition*
+**Sovereign Real Estate Underwriting, Experimental Design, Spatial Intelligence & Fiduciary Decision Platform** — *Hallmark Dusk & Daylight Editorial Editions*
 
-Part of the **MASTERNEX.os Ecosystem** (Bucket 4 — Fiduciary & Decision Intelligence · `lora_fiduciary`). Runs **100% static / zero-backend-required** in any modern browser or GitHub Pages deployment, while seamlessly connecting to **MASTERNEX.os**, **K-Dense BYOK**, **Hugging Face Hub**, and **Google Maps Platform** when available.
+Part of the **MASTERNEX.os Ecosystem** (Bucket 4 — Fiduciary & Decision Intelligence · `lora_fiduciary`). Runs **100% static / zero-backend-required** in any modern browser or GitHub Pages deployment, or as a **full-stack Docker Compose deployment** paired with live **MASTERNEX.os**, **K-Dense BYOK**, **Hugging Face Hub**, and **Google Maps Platform**.
 
-## What's New in v7.0
+## Highlights in v7.4
 
-- **5 Adaptive User Personas**: Switch instantaneously between **Institutional PE / IC**, **Broker / Acquisition**, **Fiduciary / Wealth Advisor (SR 11-7)**, **Storm & Risk Underwriter (`AUCTUM.atlas`)**, and **Retail / House-Hacker / STR** — dynamically adapting hero framing, guardrails, default strategies, and AI dossier prompts.
-- **Institutional Underwriting & Target-Price Solver**: Full 10-year **Levered IRR** (Newton-Raphson solver), **Equity Multiple**, **Break-Even Occupancy %**, **Debt Yield**, **1% Rule**, **BRRRR 75% LTV Refi Recapture**, **Target-Price Solver** (exact max price for `1.25x` DSCR), **Portfolio Comparison Matrix**, full parcel CRUD, `localStorage` auto-save, and **CSV import/export**.
-- **Experimental Design (`2³` DOE + Monte Carlo)**: Orthogonal 8-run `2³` factorial stress matrix with **Main Effects & 2-Way Interaction Effects** Pareto charting plus a seeded **1,000-trial Monte Carlo** simulation with **P10/P50/P90** and **95% bootstrap confidence intervals**.
-- **Live Ecosystem Connectors (Graceful Offline Fallback)**:
-  - **MASTERNEX.os** (`:8080`): Live `/v1/auctum/insights/underwrite` ACP-SQL sealing & `ML-DSA-87` signature verification, exact NADE/GIE/BNE Shapley bps attribution (`sum = 10,000 bps`), `/v1/auctum/fiduciary/evaluate` PII scrubber, `/v1/auctum/atlas/signal-to-dossier` storm risk, and `/v1/connectors/academic/search` (Nature, OpenAlex, arXiv, PubMed).
-  - **Hugging Face**: **HF Inference Router** (`Qwen2.5-72B`, `Llama-3.3-70B`, `DeepSeek-R1`, `Mistral-Small`) + zero-dependency **HF Datasets Server** benchmark streamer (`datasets-server.huggingface.co/rows`).
-  - **K-Dense BYOK** (`:8000`): Health probe + one-click `/skill:*` research prompt launcher pre-populated with active parcel JSON, 2³ DOE, and spatial audit.
-  - **Google Maps Platform + Open Spatial Stack**: MapLibre GL 3D OpenFreeMap + Leaflet (Esri Satellite, OpenTopoMap, Carto Dusk) + Photon/Nominatim + Overpass POIs + zero-key Google Maps 3D / Street View / Directions links + optional BYOK Google Street View Static & Geocoding.
+- **5 Adaptive User Personas**: Switch instantaneously between **Institutional PE / IC**, **Broker / Acquisition**, **Fiduciary / Wealth Advisor (SR 11-7)**, **Storm & Risk Underwriter (`AUCTUM.atlas`)**, and **Retail / House-Hacker / STR**.
+- **Institutional Underwriting & Financing Studio**: 10-year **Levered IRR** (Newton-Raphson), **Equity Multiple**, **Break-Even Occupancy %**, **BRRRR 75% LTV Refi Recapture**, **Interactive Target-Price Solver** (selectable DSCR/Cap/CoC target + 1-click Apply), **2-1 Rate Buydown & Seller Credit Calculator**, **27.5-Yr Depreciation Tax Shield**, **Portfolio Comparison Matrix**, CSV import/export, **Shareable `#deal=` URLs**, and **Print/PDF Executive Tear-Sheet**.
+- **8-App Scientific Apps Lab**:
+  1. **Experimental Design Lab** (`/skill:experimental-design`): Live ECharts Power Curve, sample-size calculator ($\alpha$, $1-\beta$, Cohen's $d$), and 2³ orthogonal DOE main/interaction effects.
+  2. **MASTERNEX Verification App** (`/skill:masternex-scientific`): 5-point honest-by-construction audit contract, live ACP-SQL / `ML-DSA-87` seal, and Auditor Pack JSON export.
+  3. **Econometrics & Tail-Risk Lab** (`/skill:statistical-analysis`): Portfolio OLS scatter + fit line ($R^2$, RMSE) and 95%/99% VaR & CVaR annual cash-flow shortfall.
+  4. **Geospatial & Huff Gravity App** (`/skill:geospatial-analysis`): Adjustable distance-decay ($\beta$) gravity model, H3 cell, Overpass POI scan, and `AUCTUM.atlas` storm exposure.
+  5. **Scientific Writing & LaTeX Studio** (`/skill:scientific-writing`): Publication-ready `.tex` (`booktabs`) and `.md` dossiers with auto-injected bibliography.
+  6. **HF Datasets Benchmark Workbench**: Stream any public Hugging Face dataset (`datasets-server.huggingface.co/rows`) with pagination, keyword filter, automatic sentiment/keyword analytics, and CSV export.
+  7. **Peer-Reviewed Literature Workbench**: Live Nature / OpenAlex / arXiv search, **Cite in Paper** Bibliography Cart, and `.bib` BibTeX export.
+  8. **Portfolio Capital Allocator**: Exact 0/1 budget-constrained portfolio optimizer maximizing Cash Flow, Levered IRR, or Risk-Adjusted (`DSCR × IRR`) return.
+- **Global `⌘K` / `Ctrl+K` Command Palette** & **Dusk ☾ / Daylight ☀** WCAG 2.2 AA theme switcher.
 
-## Quick Start
+## Quick Start (Local Vite)
 
 ```bash
 npm install
 npm run dev        # local dev server at http://localhost:4173
 npm run typecheck  # strict TypeScript check
-npm test           # Vitest unit test suite
+npm test           # Vitest suite (27 specs across 7 files)
 npm run build      # static production bundle in dist/
 ```
 
-## Repository Layout
+## Full-Stack Docker Compose (AUCTUM.Insights + MASTERNEX.os)
 
-- `index.html` — Semantic Hallmark Dusk v7.0 entry point
-- `src/engine/` — Pure deterministic underwriting, 2³ DOE, Monte Carlo, Shapley, Fiduciary, Persona, and Markdown engines
-- `src/connectors/` — MASTERNEX.os, Hugging Face, K-Dense BYOK, Google Maps Platform, and Multi-Provider AI router
-- `src/ui/` & `src/styles/` — Vanilla CSS Hallmark Dusk design system, 7-chart Apache ECharts suite, and dual MapLibre/Leaflet map controller
-- `tests/` — Vitest unit test suite
-- `.github/workflows/ci-deploy.yml` — Automated CI verification + GitHub Pages static deployment
-- `docs/LAUNCH_PLAYBOOK.md` — Go-to-market positioning, connector wiring, and deployment checklist
-- `property_underwriting_widget.html` — Compact standalone editorial underwriting widget
-- `property_insight_portfolio_analytics.ipynb` — Portfolio analytics & DOE modeling notebook
+```bash
+docker compose up -d --build
+# Frontend + Nginx reverse proxy: http://127.0.0.1:8088
+# MASTERNEX.os API (proxied at /api/masternex): http://127.0.0.1:8080
+```

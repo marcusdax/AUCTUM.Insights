@@ -1494,6 +1494,31 @@ export function initApp(): void {
     }
   });
 
+  // Dusk / Daylight Theme Switcher
+  const themeBtn = document.getElementById('btn-toggle-theme');
+  const applyTheme = (mode: 'dusk' | 'daylight') => {
+    document.documentElement.dataset.theme = mode;
+    if (themeBtn) themeBtn.textContent = mode === 'daylight' ? '☾ Dusk' : '☀ Daylight';
+    try {
+      localStorage.setItem('auctum_theme', mode);
+    } catch {
+      // ignore
+    }
+  };
+  const savedTheme = (() => {
+    try {
+      return localStorage.getItem('auctum_theme') === 'daylight' ? 'daylight' : 'dusk';
+    } catch {
+      return 'dusk';
+    }
+  })();
+  applyTheme(savedTheme);
+  themeBtn?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'daylight' ? 'dusk' : 'daylight';
+    applyTheme(next);
+    showToast(`Theme switched to ${next === 'daylight' ? 'Daylight Editorial' : 'Hallmark Dusk'}`);
+  });
+
   window.addEventListener('resize', () => charts.resizeAll());
 
   syncUWInputs();

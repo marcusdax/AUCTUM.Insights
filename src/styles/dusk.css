@@ -40,6 +40,37 @@
   --tracking-display: -0.022em;
 }
 
+[data-theme="daylight"] {
+  --color-paper: oklch(96.5% 0.008 78);
+  --color-paper-2: oklch(93% 0.010 78);
+  --color-paper-3: oklch(89% 0.012 78);
+  --color-ink: oklch(18% 0.020 268);
+  --color-ink-2: oklch(30% 0.018 266);
+  --color-muted: oklch(46% 0.018 265);
+  --color-rule: oklch(84% 0.012 78);
+  --color-accent: oklch(48% 0.14 274);
+  --color-accent-ink: oklch(98% 0.005 78);
+  --color-accent-hi: oklch(42% 0.15 274);
+  --color-accent-2: oklch(54% 0.13 55);
+  --color-dusk: oklch(48% 0.15 340);
+  --color-ok: oklch(45% 0.13 158);
+  --glass: oklch(99% 0.004 78 / 0.86);
+  --glass-hi: inset 0 1px 0 oklch(100% 0 0 / 0.7), inset 0 0 0 1px oklch(20% 0.02 268 / 0.08);
+  --shadow-card: 0 14px 36px -22px oklch(20% 0.02 268 / 0.22);
+}
+
+[data-theme="daylight"] .top-nav {
+  background: oklch(97% 0.007 78 / 0.92);
+}
+[data-theme="daylight"] .inner-well {
+  background: oklch(20% 0.02 268 / 0.035);
+  border-color: oklch(20% 0.02 268 / 0.10);
+}
+[data-theme="daylight"] .btn-ghost {
+  background: oklch(20% 0.02 268 / 0.04);
+  border-color: oklch(20% 0.02 268 / 0.16);
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 ::selection { background: var(--color-accent); color: var(--color-accent-ink); }
 

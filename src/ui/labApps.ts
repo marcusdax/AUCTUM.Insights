@@ -267,21 +267,8 @@ export class LabAppsController {
         </div>
 
         <div class="inner-well pad-well stack-xs">
-          <div class="text-xs text-muted">Power Curve by Sample Size (n per arm)</div>
-          <div class="grid-4">
-            ${pwr.powerCurve
-              .map(
-                (pt) => `<div class="text-xs">
-                  <div class="flex-between"><span>n=${pt.n}</span><strong class="num">${Math.round(pt.power * 100)}%</strong></div>
-                  <div style="height:6px;background:oklch(100% 0 0 / 0.08);border-radius:99px;margin-top:3px;overflow:hidden">
-                    <div style="width:${Math.round(pt.power * 100)}%;height:100%;background:${
-                      pt.power >= this.targetPower ? 'var(--color-ok)' : 'var(--color-accent)'
-                    }"></div>
-                  </div>
-                </div>`
-              )
-              .join('')}
-          </div>
+          <div class="text-xs text-muted">Interactive Power Curve (Sample Size n/arm vs. Statistical Power)</div>
+          <div id="echart-lab-power" style="width:100%;height:190px"></div>
         </div>
 
         <div class="table-wrap">
@@ -303,6 +290,46 @@ export class LabAppsController {
           </table>
         </div>
       </div>`;
+
+    const pwrEl = document.getElementById('echart-lab-power');
+    if (pwrEl) {
+      const c = echarts.init(pwrEl);
+      c.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis', backgroundColor: '#1f2230', borderColor: '#3a3f54', textStyle: { color: '#f3f2ee', fontSize: 11 } },
+        grid: { left: 46, right: 16, top: 14, bottom: 26 },
+        xAxis: {
+          type: 'category',
+          data: pwr.powerCurve.map((pt) => `n=${pt.n}`),
+          axisLabel: { color: '#9ca1b8', fontSize: 10 },
+          axisLine: { lineStyle: { color: '#3a3f54' } },
+        },
+        yAxis: {
+          type: 'value',
+          min: 0,
+          max: 100,
+          axisLabel: { color: '#9ca1b8', fontSize: 10, formatter: '{value}%' },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+        },
+        series: [
+          {
+            name: 'Power (%)',
+            type: 'line',
+            smooth: true,
+            data: pwr.powerCurve.map((pt) => Math.round(pt.power * 100)),
+            lineStyle: { color: '#9ba8ff', width: 2.5 },
+            itemStyle: { color: '#6fd4aa' },
+            areaStyle: { color: 'rgba(155,168,255,0.16)' },
+            markLine: {
+              silent: true,
+              symbol: 'none',
+              lineStyle: { color: '#e5b887', type: 'dashed' },
+              data: [{ yAxis: Math.round(this.targetPower * 100) }],
+            },
+          },
+        ],
+      });
+    }
 
     document.getElementById('lab-exp-alpha')?.addEventListener('change', (e) => {
       this.alpha = Number((e.target as HTMLSelectElement).value);

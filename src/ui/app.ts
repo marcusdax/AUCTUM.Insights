@@ -44,7 +44,7 @@ import { buildGoogleMapsLinks } from '../connectors/googleMaps';
 import { PROVIDER_PRESETS, invokeAIProvider } from '../connectors/aiProviders';
 import { ChartManager } from './charts';
 import { SpatialMapController } from './map';
-import { LabAppsController, type LabAppId } from './labApps';
+import { LAB_APPS, LabAppsController, type LabAppId } from './labApps';
 
 const STORAGE_KEY = 'auctum_insights_v7_state';
 
@@ -1389,6 +1389,110 @@ export function initApp(): void {
       showToast(`Loaded shared deal: ${shared.parcel.address}`);
     }
   }
+
+  // Global Command Palette (Ctrl+K / ⌘K)
+  const cmdDialog = document.getElementById('cmd-palette-dialog') as HTMLDialogElement | null;
+  const cmdInput = document.getElementById('cmdk-input') as HTMLInputElement | null;
+  const cmdList = document.getElementById('cmdk-list');
+
+  const getCommandItems = () => [
+    ...LAB_APPS.map((app) => ({
+      group: 'Scientific App',
+      label: app.title,
+      hint: app.badge,
+      run: () => {
+        switchTab('lab');
+        labApps.openApp(app.id);
+      },
+    })),
+    ...PERSONA_LIST.map((pr) => ({
+      group: 'Persona',
+      label: `Switch Persona → ${pr.label}`,
+      hint: pr.shortLabel,
+      run: () => {
+        state.persona = pr.id;
+        state.activeStrategy = pr.defaultStrategy;
+        state.fiduciaryGuardEnabled = pr.id === 'fiduciary';
+        saveState();
+        syncUWInputs();
+        renderAll();
+        showToast(`Persona switched: ${pr.label}`);
+      },
+    })),
+    {
+      group: 'Action',
+      label: 'Generate IC Audit Dossier',
+      hint: 'AI Studio',
+      run: () => void runReport('ic_audit'),
+    },
+    {
+      group: 'Action',
+      label: 'Seal Active Parcel in MASTERNEX ACP-SQL',
+      hint: 'ML-DSA-87',
+      run: () => {
+        switchTab('lab');
+        labApps.openApp('masternex-scientific');
+      },
+    },
+    {
+      group: 'Action',
+      label: 'Print / Save Executive PDF Tear-Sheet',
+      hint: 'PDF',
+      run: () => window.print(),
+    },
+  ];
+
+  const renderCmdList = (q = '') => {
+    if (!cmdList) return;
+    const clean = q.trim().toLowerCase();
+    const matches = getCommandItems().filter(
+      (item) =>
+        !clean ||
+        item.label.toLowerCase().includes(clean) ||
+        item.hint.toLowerCase().includes(clean) ||
+        item.group.toLowerCase().includes(clean)
+    );
+    cmdList.innerHTML = matches.length
+      ? matches
+          .map(
+            (item, idx) => `<button type="button" data-cmd-idx="${idx}" class="account-row" style="width:100%;text-align:left;border:1px solid oklch(100% 0 0 / 0.06)">
+              <div>
+                <div class="text-xs text-accent">${escHtml(item.group)}</div>
+                <div class="text-sm" style="color:var(--color-ink)">${escHtml(item.label)}</div>
+              </div>
+              <span class="badge badge-peri">${escHtml(item.hint)}</span>
+            </button>`
+          )
+          .join('')
+      : '<div class="text-xs text-muted pad-well">No matching commands.</div>';
+
+    cmdList.querySelectorAll<HTMLButtonElement>('[data-cmd-idx]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const picked = matches[Number(b.dataset.cmdIdx)];
+        cmdDialog?.close();
+        picked?.run();
+      })
+    );
+  };
+
+  const openCmdPalette = () => {
+    if (!cmdDialog) return;
+    if (cmdInput) cmdInput.value = '';
+    renderCmdList('');
+    cmdDialog.showModal();
+    cmdInput?.focus();
+  };
+
+  document.getElementById('btn-open-cmdk')?.addEventListener('click', openCmdPalette);
+  document.getElementById('btn-close-cmdk')?.addEventListener('click', () => cmdDialog?.close());
+  cmdInput?.addEventListener('input', (e) => renderCmdList((e.target as HTMLInputElement).value));
+  window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (cmdDialog?.open) cmdDialog.close();
+      else openCmdPalette();
+    }
+  });
 
   window.addEventListener('resize', () => charts.resizeAll());
 

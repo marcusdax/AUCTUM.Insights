@@ -1,3 +1,4 @@
+import * as echarts from 'echarts';
 import type {
   LocationAudit,
   PropertyParcel,
@@ -17,6 +18,11 @@ import {
   papersToBibTeX,
   runVerificationContract,
 } from '../engine/scientificApps';
+import {
+  type AllocationObjective,
+  optimizePortfolioAllocation,
+  summarizeHFStream,
+} from '../engine/optimizer';
 import {
   type AcademicPaper,
   type MasternexConfig,
@@ -39,7 +45,8 @@ export type LabAppId =
   | 'geospatial-analysis'
   | 'scientific-writing'
   | 'hf-datasets'
-  | 'literature-search';
+  | 'literature-search'
+  | 'portfolio-optimizer';
 
 interface LabAppDef {
   id: LabAppId;
@@ -65,7 +72,7 @@ export const LAB_APPS: LabAppDef[] = [
     id: 'statistical-analysis',
     badge: '/skill:statistical-analysis',
     title: 'Econometrics & Tail-Risk Lab',
-    subtitle: 'Portfolio OLS Regression · 95%/99% VaR & CVaR',
+    subtitle: 'Portfolio OLS Scatter · 95%/99% VaR & CVaR',
   },
   {
     id: 'geospatial-analysis',
@@ -83,13 +90,19 @@ export const LAB_APPS: LabAppDef[] = [
     id: 'hf-datasets',
     badge: 'Hugging Face Hub',
     title: 'HF Datasets Benchmark Workbench',
-    subtitle: 'Custom Dataset Streaming · Pagination · Filter · CSV',
+    subtitle: 'Streaming · Sentiment Analytics · Filter · CSV',
   },
   {
     id: 'literature-search',
     badge: 'Nature · OpenAlex · arXiv',
     title: 'Peer-Reviewed Literature Workbench',
     subtitle: 'Live Search · Cite-in-Paper Cart · BibTeX (.bib)',
+  },
+  {
+    id: 'portfolio-optimizer',
+    badge: 'Capital Allocator',
+    title: 'Portfolio Optimizer & Frontier App',
+    subtitle: 'Budget Knapsack · Cash Flow / IRR / DSCR Objective',
   },
 ];
 
@@ -130,6 +143,10 @@ export class LabAppsController {
   private litMode = 'ready';
   private litResults: AcademicPaper[] = [];
   private citations: AcademicPaper[] = [];
+
+  // Portfolio Capital Optimizer state
+  private optBudget = 250000;
+  private optObjective: AllocationObjective = 'cashflow';
 
   constructor(private cb: LabCallbacks) {}
 
@@ -197,6 +214,8 @@ export class LabAppsController {
       this.renderHFWorkbench(stageEl);
     } else if (this.activeApp === 'literature-search') {
       this.renderLiteratureWorkbench(stageEl);
+    } else if (this.activeApp === 'portfolio-optimizer') {
+      this.renderPortfolioOptimizer(stageEl, strat);
     }
   }
 
@@ -432,7 +451,50 @@ export class LabAppsController {
           <div class="inner-well pad-well"><div class="text-xs text-muted">95% CVaR (Shortfall)</div><div class="num text-xl text-dusk">${fmtDollars(econ.cvar95AnnualCf)}</div></div>
           <div class="inner-well pad-well"><div class="text-xs text-muted">99% Extreme Tail</div><div class="num text-xl text-dusk">${fmtDollars(econ.var99AnnualCf)}</div></div>
         </div>
+
+        <div class="inner-well pad-well">
+          <div class="text-xs text-muted" style="margin-bottom:4px">OLS Scatter: Purchase Price ($k) vs. Monthly Rent ($)</div>
+          <div id="echart-lab-ols" style="width:100%;height:210px"></div>
+        </div>
       </div>`;
+
+    const chartEl = document.getElementById('echart-lab-ols');
+    if (chartEl) {
+      const props = this.cb.getProperties();
+      const xs = props.map((pr) => pr.price / 1000);
+      const minX = Math.min(...xs) * 0.9;
+      const maxX = Math.max(...xs) * 1.1;
+      const c = echarts.init(chartEl);
+      c.setOption({
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'item', backgroundColor: '#1f2230', borderColor: '#3a3f54', textStyle: { color: '#f3f2ee', fontSize: 11 } },
+        grid: { left: 52, right: 16, top: 16, bottom: 28 },
+        xAxis: { type: 'value', name: '$k', axisLabel: { color: '#9ca1b8', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } } },
+        yAxis: { type: 'value', axisLabel: { color: '#9ca1b8', fontSize: 10, formatter: (v: number) => `$${v}` }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } } },
+        series: [
+          {
+            name: 'Parcels',
+            type: 'scatter',
+            symbolSize: 12,
+            data: props.map((pr) => ({
+              value: [Number((pr.price / 1000).toFixed(1)), pr.rent],
+              name: pr.address,
+              itemStyle: { color: pr.id === p.id ? '#6fd4aa' : '#9ba8ff' },
+            })),
+          },
+          {
+            name: 'OLS Fit',
+            type: 'line',
+            showSymbol: false,
+            lineStyle: { color: '#e5b887', width: 2, type: 'dashed' },
+            data: [
+              [minX, Number((econ.slope * minX + econ.intercept).toFixed(0))],
+              [maxX, Number((econ.slope * maxX + econ.intercept).toFixed(0))],
+            ],
+          },
+        ],
+      });
+    }
 
     document.getElementById('lab-stat-vol')?.addEventListener('input', (e) => {
       this.volScale = Number((e.target as HTMLInputElement).value);
@@ -618,6 +680,19 @@ export class LabAppsController {
           </div>
         </div>
 
+        ${(() => {
+          if (!filtered.length) return '';
+          const stats = summarizeHFStream(filtered);
+          const sentBadges = Object.entries(stats.sentimentCounts)
+            .map(([k, v]) => `<span class="badge ${k.includes('positive') ? 'badge-acquire' : k.includes('negative') ? 'badge-pass' : 'badge-peri'}">${escHtml(k)}: ${v}</span>`)
+            .join('');
+          const kw = stats.topKeywords.map((w) => `<span class="mono text-accent">#${escHtml(w)}</span>`).join(' ');
+          return `<div class="inner-well pad-well flex-between text-xs">
+            <div class="flex-row">${stats.hasSentiment ? sentBadges : `<span class="badge badge-peri">${stats.totalRows} rows streamed</span>`}</div>
+            <div class="text-muted">Top terms: ${kw || '—'}</div>
+          </div>`;
+        })()}
+
         <div class="stack-xs scroll-thin" style="max-height:360px">
           ${
             filtered.length
@@ -759,6 +834,92 @@ export class LabAppsController {
     document.getElementById('lab-lit-bib')?.addEventListener('click', () => {
       this.downloadText('AUCTUM_References.bib', papersToBibTeX(this.citations), 'application/x-bibtex');
       this.cb.showToast(`Exported ${this.citations.length} citations to BibTeX`);
+    });
+  }
+
+  private renderPortfolioOptimizer(el: HTMLElement, strat: UnderwritingStrategy): void {
+    const props = this.cb.getProperties();
+    const res = optimizePortfolioAllocation(props, this.optBudget, strat, this.optObjective);
+
+    el.innerHTML = `
+      <div class="stack-sm">
+        <div class="flex-between row-rule" style="padding-bottom:0.65rem">
+          <div>
+            <span class="badge badge-peri">Capital Allocator · Exact 0/1 Frontier</span>
+            <h3 style="margin-top:4px">Portfolio Capital Allocator &amp; Budget Optimizer</h3>
+            <p class="text-xs text-muted">Selects the optimal parcel subset within your cash-to-close budget (${strat.toUpperCase()} strategy)</p>
+          </div>
+          <button id="lab-opt-export" type="button" class="btn-peri btn-sm">Export Plan JSON</button>
+        </div>
+
+        <div class="grid-2 text-xs">
+          <label class="inner-well pad-well">
+            <div class="flex-between text-muted"><span>Deployable Cash Budget</span><strong class="num text-accent">${fmtDollars(this.optBudget)}</strong></div>
+            <input id="lab-opt-budget" type="range" min="50000" max="1500000" step="10000" value="${this.optBudget}" style="margin-top:8px" />
+          </label>
+          <label class="inner-well pad-well">
+            <div class="text-muted" style="margin-bottom:6px">Optimization Objective</div>
+            <select id="lab-opt-obj" class="field-select">
+              <option value="cashflow" ${this.optObjective === 'cashflow' ? 'selected' : ''}>Maximize Monthly Net Cash Flow</option>
+              <option value="irr" ${this.optObjective === 'irr' ? 'selected' : ''}>Maximize 10-Yr Levered IRR Wealth</option>
+              <option value="risk_adjusted" ${this.optObjective === 'risk_adjusted' ? 'selected' : ''}>Maximize Risk-Adjusted (DSCR × IRR)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid-4">
+          <div class="inner-well pad-well"><div class="text-xs text-muted">Selected Parcels</div><div class="num text-xl text-ok">${res.selected.length} / ${props.length}</div></div>
+          <div class="inner-well pad-well"><div class="text-xs text-muted">Cash Deployed</div><div class="num text-xl">${fmtDollars(res.totalCashDeployed)}</div><div class="text-xs text-muted">Reserve ${fmtDollars(res.remainingCash)}</div></div>
+          <div class="inner-well pad-well"><div class="text-xs text-muted">Portfolio Net / mo</div><div class="num text-xl text-ok">${fmtDollars(res.totalMonthlyNet)}</div></div>
+          <div class="inner-well pad-well"><div class="text-xs text-muted">Blended IRR / DSCR</div><div class="num text-xl">${res.blendedIrr}% <span class="c">/ ${res.blendedDscr}x</span></div></div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Status</th><th>Parcel</th><th>Cash-to-Close</th><th>Net / mo</th><th>Cap</th><th>DSCR</th><th>10-Yr IRR</th></tr></thead>
+            <tbody>
+              ${res.selected
+                .map(
+                  (a) => `<tr style="background:oklch(76% 0.11 160 / 0.08)">
+                    <td><span class="badge badge-acquire">ALLOCATE</span></td>
+                    <td><strong>${escHtml(a.parcel.address)}</strong></td>
+                    <td class="num">${fmtDollars(a.cashRequired)}</td>
+                    <td class="num text-ok">${fmtDollars(a.monthlyNet)}</td>
+                    <td class="num">${a.capRate}%</td>
+                    <td class="num">${a.dscr}x</td>
+                    <td class="num">${a.irr10Yr}%</td>
+                  </tr>`
+                )
+                .join('')}
+              ${res.skipped
+                .map(
+                  (a) => `<tr style="opacity:0.65">
+                    <td><span class="badge badge-negotiate">DEFER</span></td>
+                    <td>${escHtml(a.parcel.address)}</td>
+                    <td class="num">${fmtDollars(a.cashRequired)}</td>
+                    <td class="num">${fmtDollars(a.monthlyNet)}</td>
+                    <td class="num">${a.capRate}%</td>
+                    <td class="num">${a.dscr}x</td>
+                    <td class="num">${a.irr10Yr}%</td>
+                  </tr>`
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+
+    document.getElementById('lab-opt-budget')?.addEventListener('input', (e) => {
+      this.optBudget = Number((e.target as HTMLInputElement).value);
+      this.render();
+    });
+    document.getElementById('lab-opt-obj')?.addEventListener('change', (e) => {
+      this.optObjective = (e.target as HTMLSelectElement).value as AllocationObjective;
+      this.render();
+    });
+    document.getElementById('lab-opt-export')?.addEventListener('click', () => {
+      this.downloadText('AUCTUM_Capital_Allocation_Plan.json', JSON.stringify(res, null, 2), 'application/json');
+      this.cb.showToast('Exported Capital Allocation Plan JSON');
     });
   }
 }
